@@ -10,6 +10,8 @@ because it is quoted back to you.
 
 Sparbird only ever calls you. There is no contact list, and no way to point it at anybody else.
 
+**Live:** https://sparbird-nsi2jfswta-uc.a.run.app (Cloud Run, scales to zero, so the first load takes a moment). The public copy replays recorded calls and cannot ring anyone. To hear your own phone ring, run it on your machine.
+
 ---
 
 ## Try it without spending anything
