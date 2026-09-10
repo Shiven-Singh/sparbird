@@ -18,6 +18,13 @@ echo "project $PROJECT · region $REGION · service $SERVICE"
 gcloud services enable run.googleapis.com cloudbuild.googleapis.com artifactregistry.googleapis.com \
   --project "$PROJECT" --quiet
 
+# On a new project, Cloud Build runs as the Compute default service account, which cannot read
+# its own staging bucket until it is given the builder role. Idempotent, so it runs every time.
+NUMBER="$(gcloud projects describe "$PROJECT" --format='value(projectNumber)')"
+gcloud projects add-iam-policy-binding "$PROJECT" \
+  --member "serviceAccount:$NUMBER-compute@developer.gserviceaccount.com" \
+  --role roles/cloudbuild.builds.builder --quiet >/dev/null
+
 if ! gcloud artifacts repositories describe "$REPO" --project "$PROJECT" --location "$REGION" >/dev/null 2>&1; then
   gcloud artifacts repositories create "$REPO" --project "$PROJECT" --location "$REGION" \
     --repository-format docker --quiet
