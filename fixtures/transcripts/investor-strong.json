@@ -1,0 +1,120 @@
+{
+  "fixture_id": "investor-strong",
+  "persona_id": "first-principles-investor",
+  "note": "A pitch that lands. Numbers early, holds the point through the interrupt, gets a real next step.",
+  "call": {
+    "id": "call_fixture_investor_strong",
+    "object": "call_task",
+    "status": "completed",
+    "taskCompleted": true,
+    "completionConfidence": {
+      "score": 0.91,
+      "label": "high"
+    },
+    "summary": "Founder pitched a freight invoice reconciliation tool. Answered both objections with figures and secured a follow-up conditional on sending customer data.",
+    "evidence": [
+      "Trainee stated 40,000 dollars a month in overbilling against 4.5 million in freight spend.",
+      "Trainee gave a per-invoice cost of 11 cents today and 4 cents at 10x.",
+      "Persona agreed to a second call next week if the data holds."
+    ],
+    "structuredResult": {
+      "objections_raised": [
+        "Why does this need to exist? What breaks if it doesn't?",
+        "What does one unit cost you today, and at 10x?"
+      ],
+      "rubric_observations": {
+        "quantified_ask": "yes",
+        "survived_interrupt": "yes",
+        "unit_economics": "yes",
+        "secured_next_step": "yes"
+      },
+      "next_step_agreed": "yes",
+      "strongest_moment": "Giving the 40,000 a month figure from customer data before being asked twice.",
+      "weakest_moment": "Took a beat to connect the recovery figure to total spend.",
+      "persona_verdict": "would_take_meeting"
+    },
+    "failureCode": null,
+    "failureMessage": null,
+    "recipients": [
+      {
+        "id": "rcp_fixture_1",
+        "status": "completed",
+        "attempts": [
+          {
+            "id": "att_fixture_1",
+            "status": "completed",
+            "failureCode": null,
+            "failureMessage": null,
+            "transcriptTurns": [
+              {
+                "offset_seconds": 0,
+                "speaker": "bot",
+                "text": "Heads up, this is a simulated practice persona, not a real person. Right, you have got five minutes. Go."
+              },
+              {
+                "offset_seconds": 7,
+                "speaker": "user",
+                "text": "Thanks. We are building a reconciliation layer for freight invoices. Carriers overbill on about nine percent of shipments and nobody catches it because the audit is manual."
+              },
+              {
+                "offset_seconds": 19,
+                "speaker": "bot",
+                "text": "Why does this need to exist? What breaks if it doesn't?"
+              },
+              {
+                "offset_seconds": 24,
+                "speaker": "user",
+                "text": "Without it a mid-size shipper writes off roughly forty thousand dollars a month in overbilling. That is the number our first three customers found in their own data before they paid us anything."
+              },
+              {
+                "offset_seconds": 38,
+                "speaker": "bot",
+                "text": "Forty thousand. Against what spend?"
+              },
+              {
+                "offset_seconds": 42,
+                "speaker": "user",
+                "text": "Against about four and a half million a month in freight. So just under one percent recovered, and the audit team drops from four people to one."
+              },
+              {
+                "offset_seconds": 54,
+                "speaker": "bot",
+                "text": "What does one unit cost you today, and at 10x?"
+              },
+              {
+                "offset_seconds": 59,
+                "speaker": "user",
+                "text": "An invoice costs us eleven cents to process today, mostly model inference. At ten times the volume it is four cents, because the batches get better and we stop paying per-call pricing."
+              },
+              {
+                "offset_seconds": 75,
+                "speaker": "bot",
+                "text": "And you are raising?"
+              },
+              {
+                "offset_seconds": 78,
+                "speaker": "user",
+                "text": "Two million, eighteen months of runway, and the milestone is fifty shippers live and a million dollars in recovered spend."
+              },
+              {
+                "offset_seconds": 90,
+                "speaker": "bot",
+                "text": "Fine. Send me the customer data on those three, the real files, not a summary. If the nine percent holds I will take a second call next week."
+              },
+              {
+                "offset_seconds": 101,
+                "speaker": "user",
+                "text": "I will have it to you today. Thanks for the time."
+              },
+              {
+                "offset_seconds": 105,
+                "speaker": "bot",
+                "text": "Right. Bye."
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

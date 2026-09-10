@@ -1,0 +1,92 @@
+{
+  "fixture_id": "investor-contradiction",
+  "persona_id": "first-principles-investor",
+  "note": "The platform's structured result claims a next step and a positive verdict that the transcript does not support. Sparbird must refuse to score this and flag the disagreement.",
+  "call": {
+    "id": "call_fixture_investor_contradiction",
+    "object": "call_task",
+    "status": "completed",
+    "taskCompleted": true,
+    "completionConfidence": {
+      "score": 0.93,
+      "label": "high"
+    },
+    "summary": "Founder pitched and the call ended without a commitment.",
+    "evidence": [
+      "Persona asked for a figure and did not receive one."
+    ],
+    "structuredResult": {
+      "objections_raised": [
+        "Why does this need to exist? What breaks if it doesn't?"
+      ],
+      "rubric_observations": {
+        "quantified_ask": "yes",
+        "survived_interrupt": "unclear",
+        "unit_economics": "unclear",
+        "secured_next_step": "yes"
+      },
+      "next_step_agreed": "yes",
+      "strongest_moment": "Closed strongly and booked the follow-up.",
+      "weakest_moment": "Slow start.",
+      "persona_verdict": "would_take_meeting"
+    },
+    "failureCode": null,
+    "failureMessage": null,
+    "recipients": [
+      {
+        "id": "rcp_fixture_3",
+        "status": "completed",
+        "attempts": [
+          {
+            "id": "att_fixture_3",
+            "status": "completed",
+            "failureCode": null,
+            "failureMessage": null,
+            "transcriptTurns": [
+              {
+                "offset_seconds": 0,
+                "speaker": "bot",
+                "text": "Heads up, this is a simulated practice persona, not a real person. Go ahead."
+              },
+              {
+                "offset_seconds": 5,
+                "speaker": "user",
+                "text": "We are building tooling for freight teams. It helps them see where money is leaking."
+              },
+              {
+                "offset_seconds": 15,
+                "speaker": "bot",
+                "text": "Why does this need to exist? What breaks if it doesn't?"
+              },
+              {
+                "offset_seconds": 20,
+                "speaker": "user",
+                "text": "Teams stay manual and they keep missing things. It is a real pain point for the people we speak to."
+              },
+              {
+                "offset_seconds": 30,
+                "speaker": "bot",
+                "text": "Give me a number or I am going to stop you there."
+              },
+              {
+                "offset_seconds": 34,
+                "speaker": "user",
+                "text": "I do not have that in front of me right now."
+              },
+              {
+                "offset_seconds": 38,
+                "speaker": "bot",
+                "text": "Then we are done. Good luck with it."
+              },
+              {
+                "offset_seconds": 42,
+                "speaker": "user",
+                "text": "Okay. Thank you."
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

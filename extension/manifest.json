@@ -1,0 +1,12 @@
+{
+  "manifest_version": 3,
+  "name": "Sparbird",
+  "version": "0.1.0",
+  "description": "Turn the profile you are looking at into a rehearsal call that rings your own phone.",
+  "permissions": ["activeTab", "scripting"],
+  "host_permissions": ["http://localhost:3000/*"],
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "Rehearse this call"
+  }
+}

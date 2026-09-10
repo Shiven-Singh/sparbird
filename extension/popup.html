@@ -1,0 +1,16 @@
+<!doctype html>
+<meta charset="utf-8" />
+<title>Sparbird</title>
+<style>
+  body { width: 300px; margin: 0; padding: 16px; font: 14px/1.5 system-ui, sans-serif; color: #14202b; }
+  h1 { font-size: 15px; margin: 0 0 4px; }
+  p { color: #5b6875; font-size: 12.5px; margin: 0 0 12px; }
+  button { width: 100%; padding: 9px; border: 0; border-radius: 6px; background: #2545c9; color: #fff; font-size: 14px; cursor: pointer; }
+  button:disabled { background: #96a1b5; cursor: default; }
+  .status { margin-top: 10px; font-size: 12.5px; color: #5b6875; min-height: 18px; }
+</style>
+<h1>Rehearse this call</h1>
+<p>Reads the profile in this tab and builds a persona on your own machine. Your phone is the only one that rings.</p>
+<button id="go">Build persona</button>
+<div class="status" id="status"></div>
+<script src="popup.js"></script>

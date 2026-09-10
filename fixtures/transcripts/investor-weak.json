@@ -1,0 +1,110 @@
+{
+  "fixture_id": "investor-weak",
+  "persona_id": "first-principles-investor",
+  "note": "A pitch that dies. No figures, abandons the point under interruption, no next step.",
+  "call": {
+    "id": "call_fixture_investor_weak",
+    "object": "call_task",
+    "status": "completed",
+    "taskCompleted": true,
+    "completionConfidence": {
+      "score": 0.88,
+      "label": "high"
+    },
+    "summary": "Founder could not quantify the problem or the unit cost. Persona declined a follow-up.",
+    "evidence": [
+      "Trainee answered the first objection with market language and no figure.",
+      "Trainee said the unit cost had not been modelled.",
+      "Persona explicitly refused a second call."
+    ],
+    "structuredResult": {
+      "objections_raised": [
+        "Why does this need to exist? What breaks if it doesn't?",
+        "What does one unit cost you today, and at 10x?"
+      ],
+      "rubric_observations": {
+        "quantified_ask": "no",
+        "survived_interrupt": "no",
+        "unit_economics": "no",
+        "secured_next_step": "no"
+      },
+      "next_step_agreed": "no",
+      "strongest_moment": "Stayed calm when the persona pushed back twice.",
+      "weakest_moment": "Answered a direct cost question with a promise about margins at scale.",
+      "persona_verdict": "would_not"
+    },
+    "failureCode": null,
+    "failureMessage": null,
+    "recipients": [
+      {
+        "id": "rcp_fixture_2",
+        "status": "completed",
+        "attempts": [
+          {
+            "id": "att_fixture_2",
+            "status": "completed",
+            "failureCode": null,
+            "failureMessage": null,
+            "transcriptTurns": [
+              {
+                "offset_seconds": 0,
+                "speaker": "bot",
+                "text": "Heads up, this is a simulated practice persona, not a real person. You have got five minutes. Go."
+              },
+              {
+                "offset_seconds": 6,
+                "speaker": "user",
+                "text": "Hi, yeah, so we are building an AI platform for logistics. It is kind of an end to end visibility layer for the whole supply chain."
+              },
+              {
+                "offset_seconds": 18,
+                "speaker": "bot",
+                "text": "Why does this need to exist? What breaks if it doesn't?"
+              },
+              {
+                "offset_seconds": 23,
+                "speaker": "user",
+                "text": "Well, the industry is really fragmented and there is a lot of inefficiency, so we think there is a huge opportunity here."
+              },
+              {
+                "offset_seconds": 34,
+                "speaker": "bot",
+                "text": "That is not an answer. What breaks?"
+              },
+              {
+                "offset_seconds": 37,
+                "speaker": "user",
+                "text": "Companies lose money. It is a big problem, everyone we talk to says it is a big problem."
+              },
+              {
+                "offset_seconds": 45,
+                "speaker": "bot",
+                "text": "What does one unit cost you today, and at 10x?"
+              },
+              {
+                "offset_seconds": 50,
+                "speaker": "user",
+                "text": "We have not fully modelled that yet, but we are confident the margins will be strong at scale."
+              },
+              {
+                "offset_seconds": 59,
+                "speaker": "bot",
+                "text": "Then come back when you have. I am not going to take a second call on this."
+              },
+              {
+                "offset_seconds": 65,
+                "speaker": "user",
+                "text": "Sure, understood. Thanks for the time."
+              },
+              {
+                "offset_seconds": 68,
+                "speaker": "bot",
+                "text": "Bye."
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}
