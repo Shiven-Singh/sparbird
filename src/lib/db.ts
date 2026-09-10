@@ -169,7 +169,16 @@ export async function getStore(): Promise<Store> {
   if (store) return store;
 
   // A read-only or ephemeral host keeps history in memory rather than failing a drill.
-  if (process.env.SPARBIRD_EPHEMERAL === "1" || process.env.VERCEL) {
+  // Set SPARBIRD_EPHEMERAL=1 anywhere the disk does not survive a restart; the rest is
+  // best-effort detection of the usual serverless runtimes.
+  const ephemeral =
+    process.env.SPARBIRD_EPHEMERAL === "1" ||
+    Boolean(process.env.VERCEL) ||
+    Boolean(process.env.AWS_LAMBDA_FUNCTION_NAME) ||
+    Boolean(process.env.AWS_EXECUTION_ENV) ||
+    Boolean(process.env.K_SERVICE);
+
+  if (ephemeral) {
     store = new MemoryStore();
     return store;
   }
