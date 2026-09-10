@@ -1,44 +1,74 @@
 @import "tailwindcss";
 
+/*
+  Paper, ink, and one highlighter. Square corners. Hard rules.
+  The only colour on the page is the mark on the lines that landed.
+*/
 @theme {
-  --color-ground: #0f1013;
-  --color-surface: #16181d;
-  --color-raised: #1c1f26;
-  --color-line: #262a32;
-  --color-line-soft: #1e2229;
-  --color-ink: #e9eaee;
-  --color-ink-2: #a8aeb9;
-  --color-muted: #757b87;
+  --color-paper: #f3f2ed;
+  --color-paper-2: #e9e7e0;
+  --color-ink: #101112;
+  --color-ink-2: #3c3d40;
+  --color-muted: #6e7075;
+  --color-rule: #101112;
+  --color-rule-soft: rgba(16, 17, 18, 0.16);
+  --color-mark: #f5e51b;
+  --color-no: #c8102e;
 
-  /* one accent, used sparingly */
-  --color-brass: #d8a657;
-  --color-brass-dim: #8a6a33;
-
-  /* semantics, kept apart from the accent */
-  --color-landed: #6fb98f;
-  --color-dispute: #e08a82;
-
-  --font-display: var(--font-newsreader), ui-serif, Georgia, serif;
+  --font-display: var(--font-anton), Impact, "Arial Narrow", sans-serif;
   --font-sans: var(--font-hanken), ui-sans-serif, system-ui, sans-serif;
 
-  --radius-sm: 4px;
-  --radius-md: 8px;
+  --radius-none: 0;
 }
 
 html {
-  color-scheme: dark;
+  color-scheme: light;
 }
 
 body {
-  background: var(--color-ground);
+  background: var(--color-paper);
   color: var(--color-ink);
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
 }
 
 ::selection {
-  background: var(--color-brass-dim);
+  background: var(--color-mark);
   color: var(--color-ink);
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-ink);
+  outline-offset: 2px;
+}
+
+/* display type: condensed, upper case, tight */
+.display {
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  letter-spacing: 0.005em;
+  line-height: 0.92;
+}
+
+/* small caps labels */
+.label {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+/* a highlighter stroke over the words that earned the point */
+mark {
+  background: var(--color-mark);
+  color: var(--color-ink);
+  padding: 0.05em 0.15em 0.1em;
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
+}
+
+.tnum {
+  font-variant-numeric: tabular-nums;
 }
 
 @media (prefers-reduced-motion: reduce) {

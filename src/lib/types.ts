@@ -12,10 +12,10 @@ export interface ScriptedObjection {
 }
 
 export interface HiddenState {
-  /** What the trainee must do before the persona engages properly. */
+  /** What the trainee must do before the persona engages properly. Written for the caller. */
   engages_only_if: string;
   scripted_objections: ScriptedObjection[];
-  /** What it takes to get a commitment out of this persona. */
+  /** What it takes to get a commitment out of this persona. Written for the caller. */
   concession: string;
 }
 
@@ -35,6 +35,16 @@ export interface PersonaVoice {
   patience: string;
 }
 
+/** One thing we concluded about a person, and the words of theirs that led to it. */
+export interface Provenance {
+  /** What they said or wrote, quoted. */
+  because: string;
+  /** The trait we read from it. */
+  trait: string;
+  /** How that trait will show up on the call. */
+  objection: string;
+}
+
 export interface PersonaSpec {
   id: string;
   display_name: string;
@@ -43,6 +53,8 @@ export interface PersonaSpec {
   summary?: string;
   /** Human-facing sentences. hidden_state is written for the caller; this is written for the reader. */
   reads?: { engages_if: string; agrees_if: string };
+  /** For a persona built from a profile: which words produced which trait. */
+  provenance?: Provenance[];
   voice: PersonaVoice;
   style: string[];
   hidden_state: HiddenState;

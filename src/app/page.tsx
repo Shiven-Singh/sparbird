@@ -3,98 +3,83 @@ import { loadAllPersonas } from "@/lib/persona";
 
 export const dynamic = "force-dynamic";
 
-const STEPS = [
-  {
-    n: "1",
-    title: "Pick who calls you",
-    body: "An investor who wants a number in the first minute. A finance lead who only wants to talk price. A hiring manager who does not accept a job title as an answer.",
-  },
-  {
-    n: "2",
-    title: "Answer your phone",
-    body: "Five minutes, out loud, on a real line. They interrupt, they push, and they make up their mind about you.",
-  },
-  {
-    n: "3",
-    title: "See where you lost them",
-    body: "Every note points at the line where it happened, in their words and yours. Nothing is graded that the call did not actually show.",
-  },
-];
-
 export default function Home() {
   const personas = loadAllPersonas();
+  const archetypes = personas.filter((p) => p.source === "archetype");
+  const fromProfiles = personas.filter((p) => p.source === "profile");
 
   return (
-    <div className="mx-auto max-w-3xl px-6 py-16 md:px-10 md:py-20">
-      <header>
-        <h1 className="font-display text-4xl leading-[1.15] tracking-tight text-balance text-ink md:text-5xl">
+    <div className="mx-auto max-w-6xl px-6 pb-24">
+      <section className="grid gap-10 border-b-2 border-rule py-16 md:grid-cols-[1.4fr_1fr] md:py-20">
+        <h1 className="display text-[64px] text-balance text-ink md:text-[96px]">
           Walk in having already had the conversation.
         </h1>
-        <p className="mt-5 max-w-xl text-lg leading-relaxed text-ink-2">
-          Your phone rings. The person you are about to pitch picks up, pushes back the way they
-          will on the day, and decides. You get to find out how it goes before it counts.
-        </p>
-      </header>
-
-      <ol className="mt-14 grid gap-px overflow-hidden rounded-md border border-line bg-line sm:grid-cols-3">
-        {STEPS.map((step) => (
-          <li key={step.n} className="bg-surface p-5">
-            <span className="font-display text-sm text-brass">{step.n}</span>
-            <h2 className="mt-2 text-[15px] font-medium text-ink">{step.title}</h2>
-            <p className="mt-2 text-sm leading-relaxed text-muted">{step.body}</p>
-          </li>
-        ))}
-      </ol>
-
-      <section className="mt-16">
-        <h2 className="font-display text-2xl tracking-tight text-ink">Who do you want on the line?</h2>
-        <p className="mt-2 text-[15px] text-muted">
-          Each one is difficult in a different way, and each one is winnable.
-        </p>
-
-        <div className="mt-6 space-y-3">
-          {personas.map((persona) => (
-            <Link
-              key={persona.id}
-              href={`/drill/${persona.id}`}
-              className="group block rounded-md border border-line bg-surface p-6 transition-colors hover:border-brass-dim"
-            >
-              <div className="flex items-baseline justify-between gap-4">
-                <h3 className="font-display text-xl tracking-tight text-ink">
-                  {persona.display_name}
-                </h3>
-                <span className="shrink-0 text-xs text-muted">{persona.max_minutes} minutes</span>
-              </div>
-
-              <p className="mt-2 max-w-xl text-[15px] leading-relaxed text-ink-2">
-                {persona.summary}
-              </p>
-
-              <p className="mt-4 text-sm leading-relaxed text-muted">
-                <span className="text-ink-2">They only say yes if</span>{" "}
-                {persona.reads?.engages_if ?? persona.hidden_state.engages_only_if}.
-              </p>
-
-              <span className="mt-5 inline-flex items-center gap-1.5 text-sm text-brass">
-                Take this call
-                <span
-                  aria-hidden
-                  className="transition-transform duration-200 group-hover:translate-x-0.5"
-                >
-                  →
-                </span>
-              </span>
-            </Link>
-          ))}
+        <div className="flex flex-col justify-end gap-6">
+          <p className="max-w-md text-lg leading-relaxed text-ink-2">
+            Your phone rings. The person you are about to pitch picks up, pushes back the way they
+            will on the day, and decides. Five minutes later you know which line lost them, because
+            it is marked.
+          </p>
+          <p className="max-w-md text-sm leading-relaxed text-muted">
+            It only ever calls you. No contact list, no way to point it at somebody else, and every
+            call opens by saying out loud that it is a rehearsal.
+          </p>
         </div>
       </section>
 
-      <footer className="mt-16 border-t border-line pt-6">
-        <p className="max-w-xl text-sm leading-relaxed text-muted">
-          Sparbird only ever calls you. There is no contact list and no way to point it at somebody
-          else, and every call opens by saying out loud that it is a rehearsal.
-        </p>
-      </footer>
+      <section className="grid gap-px border-b-2 border-rule bg-rule-soft md:grid-cols-2">
+        <div className="bg-paper py-10 pr-8">
+          <p className="label text-muted">Two ways in</p>
+          <h2 className="display mt-3 text-[40px] text-ink">Pick who calls you</h2>
+          <p className="mt-3 max-w-sm text-[15px] leading-relaxed text-ink-2">
+            Three people who are hard in different ways. Each one has a read below: what they will
+            do to you, and what they need to hear before they say yes.
+          </p>
+        </div>
+        <Link
+          href="/from-profile"
+          className="group bg-paper py-10 md:pl-8 transition-colors hover:bg-paper-2"
+        >
+          <p className="label text-muted">Or</p>
+          <h2 className="display mt-3 text-[40px] text-ink">Build one from a profile</h2>
+          <p className="mt-3 max-w-sm text-[15px] leading-relaxed text-ink-2">
+            Paste what a real person says about themselves. We read it for how they will push back,
+            show you our working, and put them on the line.
+          </p>
+          <span className="label mt-5 inline-flex items-center gap-2 text-ink">
+            Start
+            <span aria-hidden className="transition-transform group-hover:translate-x-1">→</span>
+          </span>
+        </Link>
+      </section>
+
+      <section>
+        {[...fromProfiles, ...archetypes].map((persona) => (
+          <Link
+            key={persona.id}
+            href={`/drill/${persona.id}`}
+            className="group grid gap-4 border-b border-rule-soft py-8 transition-colors hover:bg-paper-2 md:grid-cols-[minmax(0,1fr)_minmax(0,1.3fr)_auto] md:items-baseline md:gap-8"
+          >
+            <div>
+              {persona.source === "profile" ? (
+                <p className="label mb-2 text-muted">Read from a profile</p>
+              ) : null}
+              <h3 className="display text-[34px] text-ink">{persona.display_name}</h3>
+            </div>
+            <div>
+              <p className="text-[15px] leading-relaxed text-ink-2">{persona.summary}</p>
+              <p className="mt-2 text-sm leading-relaxed text-muted">
+                They only warm up if{" "}
+                {persona.reads?.engages_if ?? persona.hidden_state.engages_only_if}.
+              </p>
+            </div>
+            <span className="label inline-flex items-center gap-2 text-ink">
+              Take this call
+              <span aria-hidden className="transition-transform group-hover:translate-x-1">→</span>
+            </span>
+          </Link>
+        ))}
+      </section>
     </div>
   );
 }

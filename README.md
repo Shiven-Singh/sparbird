@@ -74,6 +74,49 @@ There is a third thing worth knowing. The call service returns its own summary o
 went, and sometimes that summary does not match the recording. When the two disagree, Sparbird
 keeps the recording, says so on the page, and scores from what was actually said.
 
+## How it is put together
+
+One Node process. The pages, the API and the engine all run in it, which is why the same code
+runs from a terminal with no server at all.
+
+```
+BROWSER   /  ·  /from-profile  ·  /drill/[id]  ·  /attempt/[id]  ·  /calls
+          server-rendered pages; one small client component starts a call
+                                   │
+SERVER    POST /api/drill          │          POST /api/persona
+          (place and score)        ▼          (read a profile)
+          ┌──────────────────────────────────────────────────────┐
+          │  THE ENGINE, src/lib, plain TypeScript               │
+          │  profile.ts   what they wrote → traits, with quotes  │
+          │  persona.ts   persona → the brief the caller gets    │
+          │  calle.ts     your number only; fixture unless LIVE  │
+          │  score.ts     timings, rubric, does the summary      │
+          │               match the recording                    │
+          │  db.ts        SQLite, or memory when the disk will   │
+          │               not survive                            │
+          └──────────────────────────────────────────────────────┘
+                                   │
+OUTSIDE   CALL-E (only for a live call)   ·   an LLM (only if you turn the judge on)
+```
+
+## Deploying
+
+The public copy runs in dry-run mode on purpose: no key, no phone number, so it can never ring
+anyone. Live calls are for your own machine.
+
+Cloud Run, from the repo root, once `gcloud auth login` is done and billing is on for the project:
+
+```bash
+PROJECT=sparbird scripts/deploy.sh
+```
+
+That enables the APIs, builds the [Dockerfile](Dockerfile) on Cloud Build, and rolls it onto a
+service called `sparbird`. Run it again to ship a new version. The container keeps history in
+memory and scores the recorded calls once at boot, so the page is never empty.
+
+Any host that runs a container works the same way. Set `SPARBIRD_EPHEMERAL=1` wherever the disk
+does not survive a restart.
+
 ## What is in here
 
 ```

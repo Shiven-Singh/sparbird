@@ -43,6 +43,15 @@ const personaSchema = z.object({
   reads: z
     .object({ engages_if: z.string().min(1), agrees_if: z.string().min(1) })
     .optional(),
+  provenance: z
+    .array(
+      z.object({
+        because: z.string().min(1),
+        trait: z.string().min(1),
+        objection: z.string().min(1),
+      }),
+    )
+    .optional(),
   voice: z.object({
     locale: z.string().min(2),
     region: z.string().min(2),
