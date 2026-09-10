@@ -40,6 +40,9 @@ const personaSchema = z.object({
   source: z.enum(["archetype", "profile"]),
   audience: z.string().optional(),
   summary: z.string().optional(),
+  reads: z
+    .object({ engages_if: z.string().min(1), agrees_if: z.string().min(1) })
+    .optional(),
   voice: z.object({
     locale: z.string().min(2),
     region: z.string().min(2),

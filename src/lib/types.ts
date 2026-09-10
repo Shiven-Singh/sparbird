@@ -41,6 +41,8 @@ export interface PersonaSpec {
   source: "archetype" | "profile";
   audience?: string;
   summary?: string;
+  /** Human-facing sentences. hidden_state is written for the caller; this is written for the reader. */
+  reads?: { engages_if: string; agrees_if: string };
   voice: PersonaVoice;
   style: string[];
   hidden_state: HiddenState;

@@ -1,97 +1,90 @@
 # Sparbird
 
-**Rehearse the call before the real one.**
+**Walk in having already had the conversation.**
 
-Sparbird turns a person you are about to pitch into a phone call you can practise against.
-Pick an archetype, or paste the bio of the specific buyer, investor, or hiring manager you are
-meeting. [CALL-E](https://github.com/CALLE-AI/call-e-integrations) rings **your** phone, plays
-that counterpart, pushes back where a real one would, and hangs up. Sparbird then scores the
-attempt against the transcript and shows you the moment the pitch worked or died, quoted.
+You get one shot at the meeting that matters. Sparbird gives you a second one, first.
 
-The only number Sparbird will ever dial is the one in `OWNER_E164`. There is no recipient list,
-no campaign, and no way to point it at somebody else.
+Pick the kind of person you are about to face. Your phone rings, they pick up, and they push
+back the way they will on the day. Five minutes later you know exactly which line lost them,
+because it is quoted back to you.
+
+Sparbird only ever calls you. There is no contact list, and no way to point it at anybody else.
 
 ---
 
-## What it does
-
-1. **Compile a persona.** An archetype (`personas/*.json`) or a pasted bio becomes a persona spec:
-   speaking style, a hidden state the persona reveals only under pressure, scripted objections,
-   and the rubric that says what earns points.
-2. **Place one call.** The spec compiles into a CALL-E task plus a `resultSchema`, and the call
-   goes to your own phone. The persona opens by disclosing that it is a simulation.
-3. **Score against evidence.** Deterministic metrics come from the transcript's turn offsets.
-   Rubric items are judged separately, and an item scores only when the judge can quote the turn
-   that proves it. Anything unproven is reported as unproven, not as a zero.
-
-## Quick start
+## Try it without spending anything
 
 ```bash
 pnpm install
 cp .env.example .env
-pnpm e2e:dry        # full pipeline on recorded fixtures. No API key, no call, no cost.
-pnpm dev            # http://localhost:3000
+pnpm e2e:dry
 ```
 
-`pnpm e2e:dry` is the honest way to see what this does. It runs persona compile, result parsing,
-and scoring against the transcripts in `fixtures/transcripts/`, and never touches the network.
+That replays real calls that already happened, scored the same way a live one is. No key, no
+network, no phone ringing. Then `pnpm dev` and open http://localhost:3000 to see it as a person
+would use it.
 
-## Placing a real call
+## When you want the phone to ring
 
-Live calls are off by default. To place one you must do all three:
+Put three things in `.env`:
 
-1. Set `CALLE_API_KEY` to a key from the CALL-E dashboard.
-2. Set `OWNER_E164` to your own number in E.164 form, for example `+919876543210`.
-3. Set `SPARBIRD_LIVE=1`.
+| | |
+| --- | --- |
+| `CALLE_API_KEY` | your key from the CALL-E dashboard |
+| `OWNER_E164` | your own phone, like `+919876543210` |
+| `SPARBIRD_LIVE` | `1`, and only when you mean it |
+
+Then take a call from the app, or from a terminal:
 
 ```bash
 pnpm drill first-principles-investor
 ```
 
-The command prints the compiled task and the masked destination, then waits for you to confirm
-before it dials. With `SPARBIRD_LIVE` unset it prints the same preview and stops.
+It shows you who is calling and which number will ring, and waits for you to say yes.
 
-## Side effects
+## What it will not do
 
-| Effect | When | How to stop it |
-| --- | --- | --- |
-| One outbound phone call to `OWNER_E164` | Only with `SPARBIRD_LIVE=1` and an explicit confirm | Unset `SPARBIRD_LIVE`, or hang up |
-| One CALL-E call charged to your account | Same | Same |
-| One LLM request for rubric judging | Only when `JUDGE_PROVIDER` is not `stub` | Leave `JUDGE_PROVIDER=stub` |
-| A row written to the local SQLite file | After any drill, live or dry | Delete `data/sparbird.db` |
+It will not call anyone but you. The number in `OWNER_E164` is the only destination, and a
+drill that somehow resolves to a different one stops before the call is built.
 
-There are no recurring jobs, no scheduler, and no background workers. Every call is one explicit
-command or one button press. Nothing is queued for later.
+It will not pretend to be a real person. Every call opens by saying out loud that it is a
+rehearsal, and that line cannot be edited or removed.
 
-## Cancellation
+It will not grade a call that did not happen properly. If the line drops or the service returns
+something it cannot back up, you get told that, not a bad score.
 
-Hang up. The attempt closes and is stored as `unscored` with the reason recorded. A call that is
-cancelled, fails, or returns an outcome that cannot be read from the transcript is never scored as
-a bad pitch, because a dropped line says nothing about how you did.
+It will not run anything in the background. No schedule, no queue, no surprise calls. One call
+happens when you press the button, and hanging up ends it.
 
-## Credentials
+More detail on all of this in [SAFETY.md](SAFETY.md).
 
-Keys are read from the environment only. `.env` is gitignored, `.env.example` holds placeholders,
-and nothing is hard-coded. Phone numbers are masked wherever they are printed or stored
-(`+91 •••• ••3210`). Transcripts are stored locally; when a persona was built from a real person's
-bio, only their initials and role are kept.
+## How the scoring actually works
 
-## Repository layout
+Two layers, and the second one is not allowed to flatter you.
+
+The first is arithmetic on the call's own timestamps: how much of it you talked, how long before
+you said a real number, whether you got back to your point after being cut off.
+
+The second is the rubric. Each item scores only when a line of the transcript proves it, quoted
+word for word. If nothing proves it, the note says the call did not show it rather than saying
+you failed. That is why a score always reads as "3 of 4 things landed" and never as a bare
+percentage.
+
+There is a third thing worth knowing. The call service returns its own summary of how the call
+went, and sometimes that summary does not match the recording. When the two disagree, Sparbird
+keeps the recording, says so on the page, and scores from what was actually said.
+
+## What is in here
 
 ```
-personas/            archetype specs and one fictional sample profile
-fixtures/transcripts recorded calls that power the dry run and the tests
-src/lib/persona.ts   spec to CALL-E task and result schema
-src/lib/calle.ts     SDK wrapper, self-dial guard, fixture fallback
-src/lib/score.ts     deterministic metrics, rubric scoring, contradiction check
-src/lib/judge.ts     pluggable rubric judge (stub by default)
-src/lib/db.ts        local SQLite store
-src/app/             the web UI
-extension/           optional MV3 extension that reads the profile page you are viewing
-scripts/             drill runner and the dry-run end to end check
+personas/            the people you can practise against
+fixtures/            real calls, recorded, so anything can be tried without spending a call
+src/app/             the app
+src/lib/persona.ts   turns a person into the brief the caller is given
+src/lib/calle.ts     places the call, and refuses any number but yours
+src/lib/score.ts     the scoring, and the disagreement check
+src/lib/judge.ts     reads the transcript, offline by default
+extension/           optional: builds a persona from the profile page you are looking at
 ```
 
-## Status
-
-Built for the CALL-E hackathon, September 2026. The scoring engine, persona compiler and safety
-guards are the parts worth reusing.
+Built on [CALL-E](https://github.com/CALLE-AI/call-e-integrations). MIT licensed.

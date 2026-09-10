@@ -28,3 +28,6 @@ data/
 
 # test output
 coverage/
+
+# personas generated from a profile you were looking at
+personas/profile-*.json
