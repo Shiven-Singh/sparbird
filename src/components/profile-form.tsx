@@ -56,18 +56,15 @@ export function ProfileForm({ sample }: { sample: Sample }) {
     }
   }
 
-  const field =
-    "w-full border-0 border-b-2 border-rule bg-transparent px-0 py-3 text-[15px] text-ink placeholder:text-muted focus:border-ink focus:outline-none";
-
   return (
-    <form onSubmit={submit} className="flex flex-col gap-7">
+    <form onSubmit={submit} className="flex flex-col gap-5">
       <div>
-        <label htmlFor="headline" className="label text-muted">
+        <label htmlFor="headline" className="label mb-1.5 block text-muted">
           Their headline
         </label>
         <input
           id="headline"
-          className={field}
+          className="field"
           value={headline}
           onChange={(e) => setHeadline(e.target.value)}
           placeholder="VP Operations at Harbourline Logistics"
@@ -76,12 +73,12 @@ export function ProfileForm({ sample }: { sample: Sample }) {
       </div>
 
       <div>
-        <label htmlFor="name" className="label text-muted">
-          Their name <span className="normal-case tracking-normal">(only the initials are kept)</span>
+        <label htmlFor="name" className="label mb-1.5 block text-muted">
+          Their name <span className="font-normal normal-case tracking-normal">(only the initials are kept)</span>
         </label>
         <input
           id="name"
-          className={field}
+          className="field"
           value={name}
           onChange={(e) => setName(e.target.value)}
           placeholder="Rohan Mehta"
@@ -89,12 +86,12 @@ export function ProfileForm({ sample }: { sample: Sample }) {
       </div>
 
       <div>
-        <label htmlFor="about" className="label text-muted">
+        <label htmlFor="about" className="label mb-1.5 block text-muted">
           What they say about themselves
         </label>
         <textarea
           id="about"
-          className={`${field} min-h-28 resize-y`}
+          className="field min-h-24 resize-y"
           value={about}
           onChange={(e) => setAbout(e.target.value)}
           placeholder="Paste their about section."
@@ -102,36 +99,28 @@ export function ProfileForm({ sample }: { sample: Sample }) {
       </div>
 
       <div>
-        <label htmlFor="posts" className="label text-muted">
-          Things they have posted <span className="normal-case tracking-normal">(blank line between each)</span>
+        <label htmlFor="posts" className="label mb-1.5 block text-muted">
+          Things they have posted <span className="font-normal normal-case tracking-normal">(blank line between each)</span>
         </label>
         <textarea
           id="posts"
-          className={`${field} min-h-36 resize-y`}
+          className="field min-h-32 resize-y"
           value={posts}
           onChange={(e) => setPosts(e.target.value)}
           placeholder="Every vendor deck this quarter opened with an AI slide and closed without a price."
         />
       </div>
 
-      <div className="flex flex-wrap items-center gap-5 pt-2">
-        <button
-          type="submit"
-          disabled={busy}
-          className="label bg-ink px-6 py-4 text-paper transition-opacity hover:opacity-85 disabled:opacity-40"
-        >
+      <div className="flex flex-wrap items-center gap-4 pt-1">
+        <button type="submit" disabled={busy} className="btn">
           {busy ? "Reading them" : "Read them"}
         </button>
-        <button
-          type="button"
-          onClick={fillSample}
-          className="label text-muted underline-offset-4 hover:text-ink hover:underline"
-        >
+        <button type="button" onClick={fillSample} className="btn btn-secondary">
           Use the sample profile
         </button>
       </div>
 
-      {error ? <p className="text-sm text-no">{error}</p> : null}
+      {error ? <p className="text-[13px] text-no">{error}</p> : null}
     </form>
   );
 }

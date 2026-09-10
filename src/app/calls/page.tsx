@@ -5,8 +5,7 @@ import { loadPersona } from "@/lib/persona";
 export const dynamic = "force-dynamic";
 
 function when(iso: string): string {
-  const d = new Date(iso);
-  return d.toLocaleString("en-GB", {
+  return new Date(iso).toLocaleString("en-GB", {
     day: "numeric",
     month: "short",
     hour: "2-digit",
@@ -28,42 +27,42 @@ export default async function CallsPage() {
     }
   }
 
+  const cols = "grid-cols-[130px_minmax(0,1fr)_110px_100px_90px]";
+
   return (
-    <div className="mx-auto max-w-6xl px-6 pb-24">
-      <section className="border-b-2 border-rule py-14">
-        <p className="label text-muted">Past calls</p>
-        <h1 className="display mt-3 text-[56px] text-ink md:text-[80px]">
-          {attempts.length === 0 ? "Nothing yet." : "Every call you have taken."}
-        </h1>
-        {attempts.length === 0 ? (
-          <p className="mt-5 max-w-xl text-lg text-ink-2">
-            Your first rehearsal shows up here.{" "}
-            <Link href="/" className="underline underline-offset-4">
-              Pick who calls you.
-            </Link>
+    <div className="px-8 py-8">
+      <header className="flex flex-wrap items-end justify-between gap-6 border-b-2 border-rule pb-6">
+        <div>
+          <h1 className="display text-[28px] text-ink">Past calls</h1>
+          <p className="mt-1.5 text-[15px] text-ink-2">
+            {attempts.length === 0
+              ? "Nothing yet. Your first rehearsal shows up here."
+              : `${attempts.length} call${attempts.length === 1 ? "" : "s"}, most recent first.`}
           </p>
-        ) : null}
-      </section>
+        </div>
+        <Link href="/" className="btn">
+          New rehearsal
+        </Link>
+      </header>
 
       {attempts.length > 0 ? (
-        <div className="mt-2">
-          <div className="label grid grid-cols-[140px_minmax(0,1fr)_120px_100px] gap-4 border-b-2 border-rule py-3 text-muted">
+        <>
+          <div className={`label grid ${cols} gap-4 border-b border-rule-soft py-3 text-muted`}>
             <span>When</span>
             <span>Who</span>
             <span className="text-right">Landed</span>
+            <span className="text-right">Points</span>
             <span className="text-right">Line</span>
           </div>
           {attempts.map((a) => (
             <Link
               key={a.id}
               href={`/attempt/${encodeURIComponent(a.id)}`}
-              className="grid grid-cols-[140px_minmax(0,1fr)_120px_100px] items-baseline gap-4 border-b border-rule-soft py-4 transition-colors hover:bg-paper-2"
+              className={`grid ${cols} items-baseline gap-4 border-b border-rule-soft py-3.5 transition-colors hover:bg-paper-2`}
             >
-              <span className="tnum text-sm text-muted">{when(a.createdAt)}</span>
-              <span className="display truncate text-[26px] text-ink">
-                {names.get(a.personaId) ?? a.personaId}
-              </span>
-              <span className="tnum text-right text-[15px] text-ink">
+              <span className="tnum text-[13px] text-muted">{when(a.createdAt)}</span>
+              <span className="display truncate text-[16px] text-ink">{names.get(a.personaId) ?? a.personaId}</span>
+              <span className="tnum text-right text-[14px] text-ink">
                 {a.disposition === "unscored" ? (
                   <span className="text-muted">not graded</span>
                 ) : (
@@ -73,10 +72,13 @@ export default async function CallsPage() {
                   </>
                 )}
               </span>
+              <span className="tnum text-right text-[14px] text-ink-2">
+                {a.disposition === "unscored" ? "" : `${a.points} / ${a.maxPoints}`}
+              </span>
               <span className="label text-right text-muted">{a.live ? "real" : "recorded"}</span>
             </Link>
           ))}
-        </div>
+        </>
       ) : null}
     </div>
   );

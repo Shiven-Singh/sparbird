@@ -36,11 +36,11 @@ export function TakeCall({ personaId, live, destinationMasked }: Props) {
 
   if (busy) {
     return (
-      <div className="border-2 border-rule p-6">
-        <p className="display text-[28px] text-ink">
+      <div className="border-2 border-rule bg-white px-5 py-4">
+        <p className="display text-[18px] text-ink">
           {live ? "Calling you now. Pick up." : "One moment."}
         </p>
-        <p className="mt-2 text-sm text-muted">
+        <p className="mt-1 text-[13px] text-muted">
           {live
             ? "Stay on the line until they hang up. This page changes when the call ends."
             : "Playing a call that already happened."}
@@ -51,24 +51,16 @@ export function TakeCall({ personaId, live, destinationMasked }: Props) {
 
   if (live && armed) {
     return (
-      <div className="border-2 border-rule p-6">
-        <p className="text-[15px] text-ink">
-          Your phone will ring on <span className="tnum">{destinationMasked}</span> in a few seconds.
-          Be somewhere you can talk out loud.
+      <div className="border-2 border-rule bg-white px-5 py-4">
+        <p className="text-[14px] text-ink">
+          Your phone will ring on <span className="tnum font-medium">{destinationMasked}</span> in a
+          few seconds. Be somewhere you can talk out loud.
         </p>
-        <div className="mt-5 flex gap-3">
-          <button
-            type="button"
-            onClick={run}
-            className="label bg-mark px-6 py-4 text-ink transition-opacity hover:opacity-85"
-          >
+        <div className="mt-4 flex gap-2">
+          <button type="button" onClick={run} className="btn btn-mark">
             Ring my phone
           </button>
-          <button
-            type="button"
-            onClick={() => setArmed(false)}
-            className="label border-2 border-rule px-6 py-4 text-ink transition-colors hover:bg-paper-2"
-          >
+          <button type="button" onClick={() => setArmed(false)} className="btn btn-secondary">
             Not yet
           </button>
         </div>
@@ -78,14 +70,10 @@ export function TakeCall({ personaId, live, destinationMasked }: Props) {
 
   return (
     <div>
-      <button
-        type="button"
-        onClick={() => (live ? setArmed(true) : run())}
-        className="label bg-ink px-7 py-5 text-paper transition-opacity hover:opacity-85"
-      >
+      <button type="button" onClick={() => (live ? setArmed(true) : run())} className="btn">
         {live ? "Call me now" : "Play a call that already happened"}
       </button>
-      {error ? <p className="mt-3 text-sm text-no">{error}</p> : null}
+      {error ? <p className="mt-3 text-[13px] text-no">{error}</p> : null}
     </div>
   );
 }

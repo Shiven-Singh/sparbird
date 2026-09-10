@@ -5,17 +5,18 @@
   The only colour on the page is the mark on the lines that landed.
 */
 @theme {
-  --color-paper: #f3f2ed;
-  --color-paper-2: #e9e7e0;
-  --color-ink: #101112;
-  --color-ink-2: #3c3d40;
-  --color-muted: #6e7075;
-  --color-rule: #101112;
-  --color-rule-soft: rgba(16, 17, 18, 0.16);
+  --color-paper: #f4f3ee;
+  --color-paper-2: #ebe9e2;
+  --color-paper-3: #e1dfd6;
+  --color-ink: #121316;
+  --color-ink-2: #3d3e42;
+  --color-muted: #70727a;
+  --color-rule: #121316;
+  --color-rule-soft: rgba(18, 19, 22, 0.14);
   --color-mark: #f5e51b;
   --color-no: #c8102e;
 
-  --font-display: var(--font-anton), Impact, "Arial Narrow", sans-serif;
+  --font-brand: var(--font-poppins), ui-sans-serif, system-ui, sans-serif;
   --font-sans: var(--font-hanken), ui-sans-serif, system-ui, sans-serif;
 
   --radius-none: 0;
@@ -29,6 +30,7 @@ body {
   background: var(--color-paper);
   color: var(--color-ink);
   font-family: var(--font-sans);
+  font-size: 14px;
   -webkit-font-smoothing: antialiased;
 }
 
@@ -42,21 +44,56 @@ body {
   outline-offset: 2px;
 }
 
-/* display type: condensed, upper case, tight */
+/* headings share the wordmark's face */
 .display {
-  font-family: var(--font-display);
-  text-transform: uppercase;
-  letter-spacing: 0.005em;
-  line-height: 0.92;
+  font-family: var(--font-brand);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.05;
 }
 
 /* small caps labels */
 .label {
   font-size: 11px;
   font-weight: 600;
-  letter-spacing: 0.12em;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
 }
+
+/* controls */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 40px;
+  padding: 0 16px;
+  background: var(--color-ink);
+  color: var(--color-paper);
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+  transition: opacity 0.15s;
+}
+.btn:hover { opacity: 0.85; }
+.btn:disabled { opacity: 0.4; cursor: default; }
+.btn-secondary {
+  background: transparent;
+  color: var(--color-ink);
+  box-shadow: inset 0 0 0 1.5px var(--color-ink);
+}
+.btn-secondary:hover { background: var(--color-paper-2); opacity: 1; }
+.btn-mark { background: var(--color-mark); color: var(--color-ink); }
+
+.field {
+  width: 100%;
+  background: #fff;
+  border: 1.5px solid var(--color-rule-soft);
+  padding: 10px 12px;
+  font-size: 14px;
+  color: var(--color-ink);
+}
+.field::placeholder { color: var(--color-muted); }
+.field:focus { border-color: var(--color-ink); outline: none; }
 
 /* a highlighter stroke over the words that earned the point */
 mark {
