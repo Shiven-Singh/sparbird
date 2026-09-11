@@ -1,5 +1,5 @@
 /**
- * Turns a profile you are looking at into someone you can practise against.
+ * Turns a profile you are looking at into someone you can practice against.
  *
  * Every trait we give the persona is tied to the words that produced it, so the page can show
  * "they wrote this, so expect this". Only the person's initials and their role survive. Their

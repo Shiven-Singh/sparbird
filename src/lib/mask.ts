@@ -15,7 +15,7 @@ export function isE164(value: string): boolean {
 
 /**
  * Renders a number for display: country code, dots, last four digits.
- * `+919876543210` becomes `+91 •••• ••3210`.
+ * `+14155550123` becomes `+1 •••• ••0123`.
  */
 export function maskPhone(value: string): string {
   const raw = value.trim();
@@ -34,7 +34,7 @@ export function resolveOwnerNumber(): string {
   if (!raw) {
     throw new ConfigError(
       "OWNER_E164 is not set. Sparbird only ever dials your own number, so it needs to know it. " +
-        "Set it in .env to your phone in E.164 form, for example +919876543210.",
+        "Set it in .env to your phone in E.164 form, for example +14155550123.",
     );
   }
   if (!isE164(raw)) {

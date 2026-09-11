@@ -113,7 +113,7 @@ export default async function AttemptPage({ params }: { params: Promise<{ id: st
       {card.disputed ? (
         <p className="appear appear--soft d-3 mt-5 text-[13px] leading-relaxed text-text-2">
           <span className="label mr-2 rounded-sm border border-border px-1.5 py-0.5 text-text">Went with the recording</span>
-          The call service summarised this call in a way the recording does not support, so its
+          The call service summarized this call in a way the recording does not support, so its
           summary was ignored. Everything on this page comes from what was actually said.
         </p>
       ) : null}

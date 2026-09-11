@@ -33,7 +33,7 @@ Put three things in `.env`:
 | | |
 | --- | --- |
 | `CALLE_API_KEY` | your key from the CALL-E dashboard |
-| `OWNER_E164` | your own phone, like `+919876543210` |
+| `OWNER_E164` | your own phone, like `+14155550123` |
 | `SPARBIRD_LIVE` | `1`, and only when you mean it |
 
 Then take a call from the app, or from a terminal:
@@ -67,10 +67,10 @@ Your audience: paste what one of them says about themselves, or upload a CSV wit
 person and get all of them on the line, up to fifty at a time. There is a sample file at
 `public/sample-audience.csv` showing the columns. Every trait we give a person is shown next to
 the words of theirs that produced it, so you can see the working and disagree with it. Nobody on
-your list is ever dialled.
+your list is ever dialed.
 
 Before any call you can set how they come at you: the tone (warm, neutral, blunt, hostile) and
-what they walked in wanting (curious, sceptical, on the fence, looking for a reason to say no).
+what they walked in wanting (curious, skeptical, on the fence, looking for a reason to say no).
 Same person, different day. The caller listens to what you actually say and pushes back on it in
 their own words, not on a script.
 
@@ -142,7 +142,7 @@ does not survive a restart.
 ## What is in here
 
 ```
-personas/            the people you can practise against
+personas/            the people you can practice against
 fixtures/            real calls, recorded, so anything can be tried without spending a call
 src/app/             the app
 src/lib/persona.ts   turns a person into the brief the caller is given

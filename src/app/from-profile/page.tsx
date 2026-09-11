@@ -74,7 +74,7 @@ export default function FromProfilePage() {
             ],
             [
               "What is kept",
-              "Their initials and their role. The name and the pasted text are used to build the persona and then dropped. The call itself only ever rings your phone; nobody on your list is ever dialled.",
+              "Their initials and their role. The name and the pasted text are used to build the persona and then dropped. The call itself only ever rings your phone; nobody on your list is ever dialed.",
             ],
           ].map(([h, body]) => (
             <div key={h}>

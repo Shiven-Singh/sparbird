@@ -1,11 +1,11 @@
 {
   "note": "Fictional profile used for demos and tests. Not a real person.",
-  "name": "Rohan Mehta",
+  "name": "Ethan Caldwell",
   "headline": "VP Operations at Harbourline Logistics",
-  "location": "Singapore",
-  "about": "Fifteen years moving freight. I care about cost per shipment and very little else. Sceptical of software that promises visibility without changing the number at the bottom of the invoice.",
+  "location": "Chicago",
+  "about": "Fifteen years moving freight. I care about cost per shipment and very little else. Skeptical of software that promises visibility without changing the number at the bottom of the invoice.",
   "recent_posts": [
     "Every vendor deck this quarter opened with an AI slide and closed without a price.",
-    "Our last pilot took nine weeks to integrate and saved four hours a month. Do that maths."
+    "Our last pilot took nine weeks to integrate and saved four hours a month. Do that math."
   ]
 }

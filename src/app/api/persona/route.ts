@@ -8,7 +8,7 @@ export const runtime = "nodejs";
 const MAX_BATCH = 50;
 
 /**
- * Turns one profile, or up to fifty of them, into people you can practise against.
+ * Turns one profile, or up to fifty of them, into people you can practice against.
  * The persona is written next to the built-in ones so it shows up on the home page.
  * Only initials and a role are kept; the pasted text is used and dropped.
  */

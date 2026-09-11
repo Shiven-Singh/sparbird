@@ -105,7 +105,7 @@ export const TONES: Record<string, { label: string; brief: string }> = {
 export const INTENTS: Record<string, { label: string; brief: string }> = {
   default: { label: "As written", brief: "" },
   curious: { label: "Curious", brief: "genuinely curious and open to being convinced" },
-  skeptical: { label: "Sceptical", brief: "sceptical; assumes the pitch is oversold until shown otherwise" },
+  skeptical: { label: "Skeptical", brief: "skeptical; assumes the pitch is oversold until shown otherwise" },
   fence: { label: "On the fence", brief: "on the fence; has a real need but is weighing an alternative" },
   no: { label: "Wants to say no", brief: "looking for a reason to say no and end the call early" },
 };

@@ -81,7 +81,7 @@ export function ProfileForm({ sample }: { sample: Sample }) {
           className="field"
           value={name}
           onChange={(e) => setName(e.target.value)}
-          placeholder="Rohan Mehta"
+          placeholder="Ethan Caldwell"
         />
       </div>
 

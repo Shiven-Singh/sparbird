@@ -10,7 +10,7 @@ refuses to build a call whose recipient is anything else. There is no recipient 
 import, no contact picker, and no multi-recipient path. A drill that somehow resolves to another
 number throws `SelfDialViolation` before the CALL-E client is constructed.
 
-This is the reason Sparbird needs no consent flow: the person consenting, the person dialling and
+This is the reason Sparbird needs no consent flow: the person consenting, the person dialing and
 the person answering are the same person.
 
 ## Live calls are opt-in twice
@@ -49,7 +49,7 @@ persona's `max_minutes`.
 
 ## Unknown outcomes fail closed
 
-A call that fails, is cancelled, returns an unrecognised status, or returns a structured result
+A call that fails, is canceled, returns an unrecognised status, or returns a structured result
 that contradicts its own transcript is recorded as `unscored` with the reason attached. It is
 never folded into a score. Scores are reported as "n of m rubric items with evidence" so a
 partial read is visible as a partial read.

@@ -1,7 +1,7 @@
 /**
  * On a fresh instance the history is empty, which makes the demo look like nothing works.
  * With SPARBIRD_SEED=1, the recorded calls are scored once and saved, so there is something
- * to open. Nothing is dialled; these are the same fixtures the dry run uses.
+ * to open. Nothing is dialed; these are the same fixtures the dry run uses.
  */
 
 import { listFixtures, loadFixtureOutcome } from "./calle";

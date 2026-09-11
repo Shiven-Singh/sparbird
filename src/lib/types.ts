@@ -62,7 +62,7 @@ export interface PersonaSpec {
   max_minutes: number;
 }
 
-/** How the caller comes at you on one particular call. Chosen before dialling. */
+/** How the caller comes at you on one particular call. Chosen before dialing. */
 export interface CallSettings {
   tone: string;
   intent: string;
