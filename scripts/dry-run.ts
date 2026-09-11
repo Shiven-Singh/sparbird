@@ -30,6 +30,14 @@ const EXPECTED: Record<string, Expectation> = {
   // "we are confident the margins will be strong at scale" has nothing behind it.
   "investor-weak": { disposition: "scored", disputed: false, maxPointsAllowed: 2, flags: ["unbacked_claim"] },
   "investor-contradiction": { disposition: "scored", disputed: true, maxPointsAllowed: 2 },
+  // "I guarantee we can get this sold in thirty days" is not theirs to promise.
+  "expired-strong": { disposition: "scored", disputed: false, minPoints: 8, flags: ["overclaim"] },
+  // Said plainly, held, and nothing to walk back.
+  "difficult-clean": { disposition: "scored", disputed: false, minPoints: 8, flags: [] },
+  // Held the price and found the decider, but never costed the status quo.
+  "cfo-partial": { disposition: "scored", disputed: false, minPoints: 5, maxPointsAllowed: 8 },
+  // Everything is "we", nothing is measured, the failure question gets dodged.
+  "hiring-weak": { disposition: "scored", disputed: false, maxPointsAllowed: 2 },
 };
 
 function line(char = "-"): string {

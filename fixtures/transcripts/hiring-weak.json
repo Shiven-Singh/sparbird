@@ -1,0 +1,62 @@
+{
+  "fixture_id": "hiring-weak",
+  "persona_id": "hiring-manager",
+  "note": "A screen that goes wrong: everything is we, no numbers, and the failure question gets deflected.",
+  "call": {
+    "id": "call_fixture_hiring_weak",
+    "object": "call_task",
+    "status": "completed",
+    "taskCompleted": true,
+    "completionConfidence": { "score": 0.9, "label": "high" },
+    "summary": "Candidate described team work rather than their own decisions, gave no measured outcome, and turned the failure question into a strength.",
+    "evidence": [
+      "Every answer used we rather than I.",
+      "No figure was given for any claimed result.",
+      "The failure question was answered with a positive."
+    ],
+    "structuredResult": {
+      "objections_raised": [
+        "That sounds like the team's work. What did you decide yourself?",
+        "Tell me about something there that did not work."
+      ],
+      "rubric_observations": {
+        "owned_decision": "no",
+        "quantified_result": "no",
+        "honest_failure": "no",
+        "secured_next_step": "no"
+      },
+      "next_step_agreed": "no",
+      "strongest_moment": "Stayed composed when pushed twice in a row.",
+      "weakest_moment": "Turning the failure question into a strength instead of answering it.",
+      "persona_verdict": "would_not"
+    },
+    "failureCode": null,
+    "failureMessage": null,
+    "recipients": [
+      {
+        "id": "rcp_fixture_hire1",
+        "status": "completed",
+        "attempts": [
+          {
+            "id": "att_fixture_hire1",
+            "status": "completed",
+            "failureCode": null,
+            "failureMessage": null,
+            "transcriptTurns": [
+              { "offset_seconds": 0, "speaker": "bot", "text": "Heads up, this is a simulated practice persona, not a real person. Thanks for making time. Tell me about the migration on your CV." },
+              { "offset_seconds": 9, "speaker": "user", "text": "Sure. We moved the whole platform onto a new billing system over about a year. It was a big effort across a few teams and it went really well." },
+              { "offset_seconds": 21, "speaker": "bot", "text": "That sounds like the team's work. What did you decide yourself?" },
+              { "offset_seconds": 27, "speaker": "user", "text": "We made the architecture calls together. It was a very collaborative group, so it is hard to separate out one person's part." },
+              { "offset_seconds": 38, "speaker": "bot", "text": "Try. What is one call that was yours?" },
+              { "offset_seconds": 43, "speaker": "user", "text": "I would say I contributed to most of the important discussions and helped keep things on track." },
+              { "offset_seconds": 52, "speaker": "bot", "text": "Tell me about something there that did not work." },
+              { "offset_seconds": 58, "speaker": "user", "text": "Honestly, my weakness is that I care too much about getting it right, so sometimes I spend longer than I should on quality." },
+              { "offset_seconds": 70, "speaker": "bot", "text": "That is not what I asked. I think I have what I need. We will be in touch." },
+              { "offset_seconds": 78, "speaker": "user", "text": "Of course. Thank you for your time." }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

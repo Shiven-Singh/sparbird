@@ -1,0 +1,62 @@
+{
+  "fixture_id": "difficult-clean",
+  "persona_id": "difficult-conversation",
+  "note": "A rate increase said plainly and held, with nothing that needs walking back.",
+  "call": {
+    "id": "call_fixture_difficult_clean",
+    "object": "call_task",
+    "status": "completed",
+    "taskCompleted": true,
+    "completionConfidence": { "score": 0.87, "label": "high" },
+    "summary": "Said the rate increase in the first minute, gave the hours as the reason, held it through two attempts to renegotiate, and acknowledged the history.",
+    "evidence": [
+      "The increase was stated in the first minute.",
+      "The reason given was a measured change in hours.",
+      "The position was repeated after the client pushed twice."
+    ],
+    "structuredResult": {
+      "objections_raised": [
+        "After everything, this is what you are telling me?",
+        "Can we not just keep things the way they were?"
+      ],
+      "rubric_observations": {
+        "said_the_thing": "yes",
+        "gave_a_reason": "yes",
+        "held_position": "yes",
+        "stayed_human": "yes"
+      },
+      "next_step_agreed": "yes",
+      "strongest_moment": "Saying the number in the first minute instead of building up to it.",
+      "weakest_moment": "A long pause before answering whether the old rate could stay for one more month.",
+      "persona_verdict": "would_take_meeting"
+    },
+    "failureCode": null,
+    "failureMessage": null,
+    "recipients": [
+      {
+        "id": "rcp_fixture_diff1",
+        "status": "completed",
+        "attempts": [
+          {
+            "id": "att_fixture_diff1",
+            "status": "completed",
+            "failureCode": null,
+            "failureMessage": null,
+            "transcriptTurns": [
+              { "offset_seconds": 0, "speaker": "bot", "text": "Heads up, this is a simulated practice persona, not a real person. Hey, what is going on? You said you needed to talk." },
+              { "offset_seconds": 8, "speaker": "user", "text": "I do, and I would rather say it straight away than dance around it. Starting in April my rate goes from ninety an hour to one hundred and twenty." },
+              { "offset_seconds": 20, "speaker": "bot", "text": "After everything, this is what you are telling me?" },
+              { "offset_seconds": 25, "speaker": "user", "text": "I know how that lands, and you have been my steadiest client for three years. Here is the reason. Last quarter I tracked it: your work took fifty-two hours a month against the thirty we agreed, mostly because the scope moved every second week. The old rate was priced for thirty." },
+              { "offset_seconds": 45, "speaker": "bot", "text": "Can we not just keep things the way they were?" },
+              { "offset_seconds": 50, "speaker": "user", "text": "Not at ninety, no. I can keep the rate where it is if we hold to thirty hours and anything past that waits for the next month. Or one hundred and twenty and it stays as flexible as it is now. Either of those works for me. The one that does not is fifty hours at the old number." },
+              { "offset_seconds": 71, "speaker": "bot", "text": "You are serious about this." },
+              { "offset_seconds": 75, "speaker": "user", "text": "I am. And I would rather tell you in March than resent it in June." },
+              { "offset_seconds": 83, "speaker": "bot", "text": "Let me talk to my partner and come back to you this week." },
+              { "offset_seconds": 90, "speaker": "user", "text": "That is fair. Take the week, and thank you for not making this harder than it is." }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -62,6 +62,26 @@ const FIRST_PERSON_DECISION = /\b(i decided|i chose|i made the call|i owned|i pu
 
 const FAILURE_WORDS = /\b(did not work|didn't work|failed|we lost|mistake|got it wrong|fell over|missed)\b/i;
 
+/** A concrete thing about the property or the deal, rather than an adjective. */
+const SPECIFIC_REASON =
+  /\b(photos?|photography|price|priced|pricing|listing price|days on market|marketing|description|staging|showings?|open house|feedback|exposure|syndicat\w+)\b/i;
+
+/** Saying the decision out loud rather than circling it. */
+const PLAIN_STATEMENT =
+  /\b(i(?:'m| am) (?:raising|ending|leaving|letting you go|not able to|going to have to)|we(?:'re| are) (?:ending|stopping|parting|moving on)|as of|effective|starting (?:next|in)|my (?:new )?rate)\b/i;
+
+/** Words that recognize the other person's side of it. */
+/** Talking about what they already spend, rather than what you charge. */
+const STATUS_QUO =
+  /\b(today|currently|right now|at the moment|as it stands|manually|by hand|your team (?:spends|spend)|you(?:'re| are) (?:already )?(?:spending|paying)|the way you do it|per month on|a month on)\b/i;
+
+/** Holding the number when asked to cut it. */
+const HELD_PRICE =
+  /\b(?:can(?:'t|not) (?:discount|go lower|do that)|no discount|not able to discount|the price (?:is|stays)|rather than (?:discount|cut)|instead of (?:a )?discount|what (?:it|the price) buys)\b/i;
+
+const ACKNOWLEDGMENT =
+  /\b(i know (?:this|that)|i understand|that(?:'s| is) fair|you(?:'ve| have) been|i(?:'m| am) sorry|i appreciate|it means a lot|you deserve)\b/i;
+
 const STOPWORDS = new Set([
   "about", "after", "again", "against", "because", "before", "being", "between", "could",
   "every", "first", "there", "these", "thing", "think", "those", "through", "under", "where",
@@ -108,6 +128,16 @@ function quoteAround(text: string, pattern: RegExp): string {
   const hit = sentences.find((s) => pattern.test(s));
   const chosen = hit ?? sentences[0] ?? text;
   return chosen.trim().slice(0, 220);
+}
+
+/** Two signals count together only when they land in the same sentence. "Twenty-eight hundred
+ *  a month for the team plan. How do you handle this today?" is a price and a question, not a
+ *  statement about what today costs them. */
+function sameSentence(text: string, a: RegExp, b: RegExp): string | null {
+  for (const sentence of text.split(/(?<=[.?!])\s+/)) {
+    if (a.test(sentence) && b.test(sentence)) return sentence;
+  }
+  return null;
 }
 
 function stems(text: string): Set<string> {
@@ -208,10 +238,49 @@ type Check = (transcript: TranscriptTurn[]) => Hit | null;
 function checkFor(item: RubricItem): Check | null {
   const e = `${item.evidence} ${item.description}`.toLowerCase();
 
-  if (/agree|follow-up|follow up|next step/.test(e)) {
+  if (/agree|follow-up|follow up|next step|specific time|visit/.test(e)) {
     return (t) => findAgreement(t);
   }
-  if (/cut off|interrupt|same claim|pushback/.test(e)) {
+  if (/question about|asks? about|before any pitch/.test(e)) {
+    // A question asked of them, not an answer given to them.
+    return (t) => {
+      const hit = traineeTurns(t).find((x) => x.text.includes("?"));
+      return hit ? { ...hit, pattern: /[^.?!]*\?/ } : null;
+    };
+  }
+  if (/status quo|current process|current way|costs (?:them )?today/.test(e)) {
+    // Their spend, not your price: the turn has to carry a figure and talk about how things
+    // are done now, or quoting your own rate would count as reframing.
+    return (t) => {
+      const hit = traineeTurns(t).find((x) => sameSentence(x.text, NUMERIC, STATUS_QUO) !== null);
+      return hit ? { ...hit, pattern: STATUS_QUO } : null;
+    };
+  }
+  if (/discount|declines? or defers?/.test(e)) {
+    return (t) => {
+      const hit = traineeTurns(t).find((x) => HELD_PRICE.test(x.text));
+      return hit ? { ...hit, pattern: HELD_PRICE } : null;
+    };
+  }
+  if (/photos|days on market|named specifically|specific reason/.test(e)) {
+    return (t) => {
+      const hit = traineeTurns(t).find((x) => SPECIFIC_REASON.test(x.text));
+      return hit ? { ...hit, pattern: SPECIFIC_REASON } : null;
+    };
+  }
+  if (/stated plainly|not implied|decision stated/.test(e)) {
+    return (t) => {
+      const hit = traineeTurns(t).find((x) => PLAIN_STATEMENT.test(x.text));
+      return hit ? { ...hit, pattern: PLAIN_STATEMENT } : null;
+    };
+  }
+  if (/recognize|acknowledg|other person/.test(e)) {
+    return (t) => {
+      const hit = traineeTurns(t).find((x) => ACKNOWLEDGMENT.test(x.text));
+      return hit ? { ...hit, pattern: ACKNOWLEDGMENT } : null;
+    };
+  }
+  if (/cut off|interrupt|same claim|pushback|after the objection/.test(e)) {
     return (t) => findSurvivedInterrupt(t);
   }
   if (/cost|per-unit|per unit|price/.test(e)) {

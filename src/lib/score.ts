@@ -25,7 +25,8 @@ const INTERROGATIVE = /^(what|why|how|when|where|who|which|do|does|did|can|could
 
 const REFUSAL = /\b(not going to|won't take|will not take|we are done|we're done|good luck|come back when|i'll pass|i will pass|not interested)\b/i;
 
-const AGREEMENT = /\b(send me|send it|i will take|i'll take|second call|next week|book|schedule|set something up|follow up|follow-up)\b/i;
+const AGREEMENT =
+  /\b(send me|send it|i will take|i'll take|second call|next week|book|schedule|set something up|follow up|follow-up|come by|come round|see you|that works|works for (?:me|us)|let's do|sounds good|(?:monday|tuesday|wednesday|thursday|friday|saturday|sunday)[^.?!]{0,24}(?:works|at \\d|at (?:six|seven|eight|nine|ten|eleven|twelve)))\b/i;
 
 /** A turn lasts until the next one starts. The last turn gets a nominal four seconds. */
 function turnDurations(transcript: TranscriptTurn[]): number[] {
@@ -98,13 +99,21 @@ export function detectContradictions(
   const traineeText = transcript.filter((t) => t.speaker === "user").map((t) => t.text);
 
   if (result.next_step_agreed === "yes") {
-    const refused = personaText.some((t) => REFUSAL.test(t));
-    const agreed = personaText.some((t) => AGREEMENT.test(t) && !REFUSAL.test(t));
-    if (refused && !agreed) {
+    // Order decides this. A call that opens with "not interested" and ends with "Thursday at
+    // six" is an agreement; only a refusal that comes after the last agreement is a refusal.
+    const lastRefusal = personaText.reduce((at, t, i) => (REFUSAL.test(t) ? i : at), -1);
+    const lastAgreement = personaText.reduce(
+      (at, t, i) => (AGREEMENT.test(t) && !REFUSAL.test(t) ? i : at),
+      -1,
+    );
+    if (lastRefusal !== -1 && lastRefusal > lastAgreement) {
       found.push({
         field: "next_step_agreed",
         claimed: "yes",
-        reason: "The persona refused on the call. No turn contains an agreement to a next step.",
+        reason:
+          lastAgreement === -1
+            ? "The persona refused on the call. No turn contains an agreement to a next step."
+            : "The persona agreed and then refused. The refusal was the last word on it.",
       });
     }
   }

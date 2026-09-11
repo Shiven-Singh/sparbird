@@ -1,0 +1,67 @@
+{
+  "fixture_id": "expired-strong",
+  "persona_id": "expired-listing-seller",
+  "note": "A listing call that works: asks what happened first, names the real reason, holds on price, gets the appointment. Also contains a guarantee that should be walked back.",
+  "call": {
+    "id": "call_fixture_expired_strong",
+    "object": "call_task",
+    "status": "completed",
+    "taskCompleted": true,
+    "completionConfidence": { "score": 0.89, "label": "high" },
+    "summary": "Agent asked about the previous listing before pitching, named the photography and the price as the reasons it sat, and secured a Thursday appointment.",
+    "evidence": [
+      "Agent asked what the last agent did before saying anything about themselves.",
+      "Agent named the photos and the first-week price as the specific reasons.",
+      "Seller agreed to Thursday at six."
+    ],
+    "structuredResult": {
+      "objections_raised": [
+        "We are not interested. We have had ten agents call today.",
+        "The last agent promised the same thing. What would you do differently?",
+        "We are not dropping the price. The house is worth what we asked."
+      ],
+      "rubric_observations": {
+        "asked_what_happened": "yes",
+        "named_a_reason": "yes",
+        "held_on_price": "yes",
+        "secured_next_step": "yes"
+      },
+      "next_step_agreed": "yes",
+      "strongest_moment": "Asking what the last agent actually did before making any claim of their own.",
+      "weakest_moment": "Promising a thirty-day sale, which is not theirs to promise.",
+      "persona_verdict": "would_take_meeting"
+    },
+    "failureCode": null,
+    "failureMessage": null,
+    "recipients": [
+      {
+        "id": "rcp_fixture_exp1",
+        "status": "completed",
+        "attempts": [
+          {
+            "id": "att_fixture_exp1",
+            "status": "completed",
+            "failureCode": null,
+            "failureMessage": null,
+            "transcriptTurns": [
+              { "offset_seconds": 0, "speaker": "bot", "text": "Heads up, this is a simulated practice persona, not a real person. Hello?" },
+              { "offset_seconds": 5, "speaker": "user", "text": "Hi, is this the owner on Kestrel Lane? My name is Dana Brooks, I work the neighborhood. I saw the listing came off the market last week." },
+              { "offset_seconds": 14, "speaker": "bot", "text": "We are not interested. We have had ten agents call today." },
+              { "offset_seconds": 19, "speaker": "user", "text": "I believe it, and I am not going to pitch you. Can I ask one thing instead? What did the last agent actually do for you in those six months?" },
+              { "offset_seconds": 31, "speaker": "bot", "text": "Not much. An open house at the start, and then we barely heard from him." },
+              { "offset_seconds": 38, "speaker": "user", "text": "That matches what I saw. Two things stood out to me. The photos were taken on a grey afternoon and the front of the house is in shadow in every one of them. And the first two weeks were priced about twenty thousand above the last three comparable sales on your street, which is when most of your showings were going to come." },
+              { "offset_seconds": 57, "speaker": "bot", "text": "The last agent promised the same thing. What would you do differently?" },
+              { "offset_seconds": 63, "speaker": "user", "text": "New photography on a bright morning before anything goes live, and a price that sits just under the last comparable rather than above it. I guarantee we can get this sold in thirty days." },
+              { "offset_seconds": 78, "speaker": "bot", "text": "We are not dropping the price. The house is worth what we asked." },
+              { "offset_seconds": 84, "speaker": "user", "text": "It may well be worth it to the right buyer. My point is narrower than dropping the price. The first two weeks are when you get the most showings, and starting above the comps is what cost you those two weeks. Same price later, different order." },
+              { "offset_seconds": 101, "speaker": "bot", "text": "Hm. And you would redo the photos at your own cost?" },
+              { "offset_seconds": 107, "speaker": "user", "text": "At my cost, before it lists. Could I come by Thursday and show you the three comparables and what the new photos would look like? Twenty minutes." },
+              { "offset_seconds": 119, "speaker": "bot", "text": "Thursday at six works. Bring the comps, and do not waste our time." },
+              { "offset_seconds": 127, "speaker": "user", "text": "Thursday at six. Thank you for hearing me out." }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

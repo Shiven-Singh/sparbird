@@ -1,0 +1,64 @@
+{
+  "fixture_id": "cfo-partial",
+  "persona_id": "price-shopping-cfo",
+  "note": "A call that gets most of the way: holds the price and finds the decider, but never puts a number on what the current process costs.",
+  "call": {
+    "id": "call_fixture_cfo_partial",
+    "object": "call_task",
+    "status": "completed",
+    "taskCompleted": true,
+    "completionConfidence": { "score": 0.84, "label": "high" },
+    "summary": "Rep declined to discount and asked who else decides, but never quantified the cost of the status quo, so the CFO stayed on price.",
+    "evidence": [
+      "Rep declined the discount and offered a shorter term instead.",
+      "Rep asked who else would be involved.",
+      "No figure was given for what the current process costs."
+    ],
+    "structuredResult": {
+      "objections_raised": [
+        "We're already looking at something that costs about half of that.",
+        "What kind of discount can you do if we sign this quarter?"
+      ],
+      "rubric_observations": {
+        "reframed_to_cost": "no",
+        "held_price": "yes",
+        "found_decider": "yes",
+        "secured_next_step": "yes"
+      },
+      "next_step_agreed": "yes",
+      "strongest_moment": "Refusing the discount without apologizing for the price.",
+      "weakest_moment": "Answering the cheaper-competitor line with features instead of the cost of doing nothing.",
+      "persona_verdict": "undecided"
+    },
+    "failureCode": null,
+    "failureMessage": null,
+    "recipients": [
+      {
+        "id": "rcp_fixture_cfo1",
+        "status": "completed",
+        "attempts": [
+          {
+            "id": "att_fixture_cfo1",
+            "status": "completed",
+            "failureCode": null,
+            "failureMessage": null,
+            "transcriptTurns": [
+              { "offset_seconds": 0, "speaker": "bot", "text": "Heads up, this is a simulated practice persona, not a real person. You have got ten minutes. What is the number?" },
+              { "offset_seconds": 8, "speaker": "user", "text": "Twenty-eight hundred a month for the team plan. Before I get into what it does, can I ask how you handle this today?" },
+              { "offset_seconds": 18, "speaker": "bot", "text": "We're already looking at something that costs about half of that." },
+              { "offset_seconds": 24, "speaker": "user", "text": "I have seen that one. The difference is the reconciliation step, which they leave to your team. Ours closes it automatically and the audit trail is built in." },
+              { "offset_seconds": 37, "speaker": "bot", "text": "Features. Everyone says features. What kind of discount can you do if we sign this quarter?" },
+              { "offset_seconds": 45, "speaker": "user", "text": "I cannot discount the seat price, and I would rather not, because then you would wonder what it was really worth. What I can do is a six-month term instead of twelve so the commitment is smaller." },
+              { "offset_seconds": 60, "speaker": "bot", "text": "Hm. Who else has signed off on this at other companies our size?" },
+              { "offset_seconds": 67, "speaker": "user", "text": "Usually finance and whoever owns the close. Who else would be in the room on your side?" },
+              { "offset_seconds": 76, "speaker": "bot", "text": "Our controller, and eventually the CEO if it is over twenty-five hundred." },
+              { "offset_seconds": 84, "speaker": "user", "text": "Then let me send something your controller can read in five minutes, and we can talk again once they have seen it." },
+              { "offset_seconds": 94, "speaker": "bot", "text": "Send it. I will book fifteen minutes next week if it holds up." },
+              { "offset_seconds": 102, "speaker": "user", "text": "It will be with you this afternoon. Thank you for the time." }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}
