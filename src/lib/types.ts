@@ -135,6 +135,33 @@ export interface Contradiction {
 
 export type Disposition = "scored" | "unscored";
 
+export type FlagKind =
+  | "overclaim"
+  | "unbacked_claim"
+  | "promise"
+  | "pressure"
+  | "disparagement";
+
+/** One thing said on the call that should be looked at again, with the words that said it. */
+export interface ReviewFlag {
+  kind: FlagKind;
+  /** What to do about it, in plain words. */
+  note: string;
+  span: EvidenceSpan;
+}
+
+export interface ReviewPoint {
+  text: string;
+  span: EvidenceSpan | null;
+}
+
+/** The plain-words read of a call: what worked, what hurt, what to watch. */
+export interface Review {
+  good: ReviewPoint[];
+  bad: ReviewPoint[];
+  flags: ReviewFlag[];
+}
+
 export interface Scorecard {
   personaId: string;
   callId: string;
@@ -156,4 +183,6 @@ export interface Scorecard {
   weakestMoment: string | null;
   personaVerdict: string | null;
   judge: string;
+  /** Absent on cards scored before reviews existed. */
+  review?: Review;
 }

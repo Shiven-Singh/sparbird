@@ -1,25 +1,44 @@
 /**
- * Rubric judges.
+ * Rubric judges and call reviewers.
  *
- * A judge decides whether the transcript proves a rubric item. The rule every judge obeys:
- * an item is met only when the judge can point at the turn that proves it and quote it
- * verbatim. A quote that does not appear in the transcript is thrown away and the item is
- * recorded as unproven, so a confident-sounding judge cannot invent evidence.
+ * A judge decides whether the transcript proves a rubric item, and then reads the whole call
+ * for what worked, what hurt, and what should be looked at again: a promise made on the line,
+ * an absolute that cannot be backed, pressure, running down the alternative.
  *
- * The default judge is a deterministic stub: no network, no key, no cost. It is honest about
- * what it cannot check. Set JUDGE_PROVIDER=anthropic with a key for the model judge.
+ * The rule every judge obeys: a point is made only when the judge can point at the turn that
+ * proves it and quote it verbatim. A quote that does not appear in the transcript is thrown away,
+ * so a confident-sounding judge cannot invent evidence.
+ *
+ * The default judge is deterministic: no network, no key, no cost. It is honest about what it
+ * cannot check. Set JUDGE_PROVIDER=anthropic with a key for the model judge.
  */
 
-import type { EvidenceSpan, RubricItem, RubricVerdict, TranscriptTurn } from "./types";
+import type {
+  EvidenceSpan,
+  FlagKind,
+  Metrics,
+  Review,
+  ReviewFlag,
+  ReviewPoint,
+  RubricItem,
+  RubricVerdict,
+  TranscriptTurn,
+} from "./types";
 
 export interface JudgeInput {
   transcript: TranscriptTurn[];
   rubric: RubricItem[];
 }
 
+export interface ReviewInput extends JudgeInput {
+  verdicts: RubricVerdict[];
+  metrics: Metrics;
+}
+
 export interface RubricJudge {
   readonly name: string;
   judge(input: JudgeInput): Promise<RubricVerdict[]>;
+  review(input: ReviewInput): Promise<Review>;
 }
 
 const NUMBER_WORDS =
@@ -50,6 +69,35 @@ const STOPWORDS = new Set([
   "what", "when", "your", "yeah", "really", "going", "right", "still", "thanks",
 ]);
 
+/** Things said on a call that deserve a second look, and what to do about each. */
+const FLAGS: Array<{ kind: FlagKind; test: RegExp; note: string }> = [
+  {
+    kind: "overclaim",
+    test: /\b(guarantee[ds]?|100 ?%|never fails?|zero risk|no risk at all|always works|can(?:'|no)t fail|cannot fail|best in the (?:market|world|business)|the only (?:solution|product|tool)|nobody else can|everyone (?:needs|wants|uses))\b/i,
+    note: "That is an absolute. If they check it and it is not true, everything else you said goes with it.",
+  },
+  {
+    kind: "unbacked_claim",
+    test: /\b(?:we(?:'| a)re|i(?:'| a)m) confident\b|\btrust me\b|\bwill (?:definitely|certainly|absolutely)\b|\b(?:will|would) be (?:strong|huge|massive|great|fine) at scale\b/i,
+    note: "A forecast with nothing behind it. Give the number that supports it, or drop the adjective.",
+  },
+  {
+    kind: "promise",
+    test: /\b(?:i|we)(?:'ll| will) (?:have|get|send) (?:it|that|this|them) (?:to|over to|with) you (?:by|today|tonight|tomorrow|this week)\b|\bby (?:tomorrow|tonight|end of (?:the )?day|eod|monday|next week|friday)\b|\b(?:i|we) promise\b|\byou(?:'ll| will) (?:see|have) (?:it|results?) (?:by|within|in) \b/i,
+    note: "You made a commitment on the call. Write it down now and keep it, or it becomes the story they tell about you.",
+  },
+  {
+    kind: "pressure",
+    test: /\b(?:only today|last chance|offer expires|limited time|decide (?:now|today)|right now or|before it(?:'s| is) gone)\b/i,
+    note: "Pressure on a first call costs more trust than it buys.",
+  },
+  {
+    kind: "disparagement",
+    test: /\btheir (?:product|tool|team|stuff) is (?:garbage|trash|useless|a joke|terrible|broken)\b|\b(?:scam|rip-?off|incompetent|clueless)\b/i,
+    note: "Running down the alternative makes you look worried about it. Talk about what yours does instead.",
+  },
+];
+
 export function containsNumber(text: string): boolean {
   return /\d/.test(text) || NUMBER_WORDS.test(text);
 }
@@ -71,6 +119,10 @@ function stems(text: string): Set<string> {
       .filter((w) => w.length >= 5 && !STOPWORDS.has(w))
       .map((w) => w.slice(0, 6)),
   );
+}
+
+function lowerFirst(s: string): string {
+  return s.charAt(0).toLowerCase() + s.slice(1);
 }
 
 interface Indexed {
@@ -159,7 +211,7 @@ function checkFor(item: RubricItem): Check | null {
   if (/agree|follow-up|follow up|next step/.test(e)) {
     return (t) => findAgreement(t);
   }
-  if (/cut off|interrupt|same claim/.test(e)) {
+  if (/cut off|interrupt|same claim|pushback/.test(e)) {
     return (t) => findSurvivedInterrupt(t);
   }
   if (/cost|per-unit|per unit|price/.test(e)) {
@@ -180,7 +232,80 @@ function checkFor(item: RubricItem): Check | null {
       return hit ? { ...hit, pattern: FAILURE_WORDS } : null;
     };
   }
+  if (/direct answer|first objection|priority/.test(e)) {
+    // Answered their first push: the trainee's next turn after the first objection carries
+    // a figure or stays on the objection's own words.
+    return (t) => findSurvivedInterrupt(t);
+  }
   return null;
+}
+
+/** Discards any quote the transcript does not actually contain. */
+export function verifySpan(
+  transcript: TranscriptTurn[],
+  span: EvidenceSpan | null,
+): { span: EvidenceSpan | null; reason: string | null } {
+  if (!span) return { span: null, reason: "No evidence offered." };
+  const turn = transcript[span.turn];
+  if (!turn) return { span: null, reason: "Evidence pointed at a turn that does not exist." };
+  const quote = span.quote.trim();
+  if (quote.length === 0) return { span: null, reason: "Evidence quote was empty." };
+  if (!turn.text.includes(quote)) {
+    return { span: null, reason: "Evidence quote does not appear in that turn." };
+  }
+  return { span: { turn: span.turn, quote }, reason: null };
+}
+
+/** The flags any judge can find by reading the trainee's lines against known patterns. */
+export function scanFlags(transcript: TranscriptTurn[]): ReviewFlag[] {
+  const found: ReviewFlag[] = [];
+  for (const turn of traineeTurns(transcript)) {
+    for (const flag of FLAGS) {
+      if (!flag.test.test(turn.text)) continue;
+      found.push({
+        kind: flag.kind,
+        note: flag.note,
+        span: { turn: turn.turn, quote: quoteAround(turn.text, flag.test) },
+      });
+    }
+  }
+  return found;
+}
+
+/** What worked and what hurt, read from the rubric verdicts and the call's own numbers. */
+function pointsFrom({ verdicts, metrics }: ReviewInput): { good: ReviewPoint[]; bad: ReviewPoint[] } {
+  const good: ReviewPoint[] = [];
+  const bad: ReviewPoint[] = [];
+
+  for (const v of verdicts) {
+    if (v.met) good.push({ text: v.description, span: v.span });
+    else bad.push({ text: `Never ${lowerFirst(v.description)}`, span: null });
+  }
+
+  const ratio = metrics.talkRatioTrainee;
+  if (ratio !== null && ratio >= 0.72) {
+    bad.push({
+      text: `You talked ${Math.round(ratio * 100)}% of the call. They barely got a word in, and people say yes to calls they got to speak on.`,
+      span: null,
+    });
+  } else if (ratio !== null && ratio >= 0.4 && ratio <= 0.65) {
+    good.push({ text: `You left them room. ${Math.round(ratio * 100)}% of the call was yours.`, span: null });
+  }
+
+  if (metrics.traineeQuestions === 0 && metrics.traineeTurns >= 3) {
+    bad.push({ text: "You did not ask them a single question.", span: null });
+  } else if (metrics.traineeQuestions >= 2) {
+    good.push({ text: `You asked ${metrics.traineeQuestions} questions instead of only answering theirs.`, span: null });
+  }
+
+  // The rubric judge reads "held the point" more generously than the timing metric does;
+  // do not say both on one card.
+  const heldByRubric = verdicts.some((v) => v.met && /interrupt|pushback|cut off/i.test(`${v.id} ${v.description}`));
+  if (metrics.interruptsFaced > 0 && metrics.interruptsSurvived === 0 && !heldByRubric) {
+    bad.push({ text: "Every time they pushed, you moved off your point instead of finishing it.", span: null });
+  }
+
+  return { good, bad };
 }
 
 export class StubJudge implements RubricJudge {
@@ -221,22 +346,11 @@ export class StubJudge implements RubricJudge {
       };
     });
   }
-}
 
-/** Discards any quote the transcript does not actually contain. */
-export function verifySpan(
-  transcript: TranscriptTurn[],
-  span: EvidenceSpan | null,
-): { span: EvidenceSpan | null; reason: string | null } {
-  if (!span) return { span: null, reason: "No evidence offered." };
-  const turn = transcript[span.turn];
-  if (!turn) return { span: null, reason: "Evidence pointed at a turn that does not exist." };
-  const quote = span.quote.trim();
-  if (quote.length === 0) return { span: null, reason: "Evidence quote was empty." };
-  if (!turn.text.includes(quote)) {
-    return { span: null, reason: "Evidence quote does not appear in that turn." };
+  async review(input: ReviewInput): Promise<Review> {
+    const { good, bad } = pointsFrom(input);
+    return { good, bad, flags: scanFlags(input.transcript) };
   }
-  return { span: { turn: span.turn, quote }, reason: null };
 }
 
 class ModelJudge implements RubricJudge {
@@ -250,14 +364,27 @@ class ModelJudge implements RubricJudge {
     this.name = `model:${model}`;
   }
 
-  async judge({ transcript, rubric }: JudgeInput): Promise<RubricVerdict[]> {
+  private async ask(prompt: string, maxTokens: number): Promise<string> {
     const { default: Anthropic } = await import("@anthropic-ai/sdk");
     const client = new Anthropic({ apiKey: this.apiKey });
+    const response = await client.messages.create({
+      model: this.model,
+      max_tokens: maxTokens,
+      messages: [{ role: "user", content: prompt }],
+    });
+    return response.content
+      .map((block) => ("text" in block ? block.text : ""))
+      .join("")
+      .trim();
+  }
 
-    const numbered = transcript
+  private numbered(transcript: TranscriptTurn[]): string {
+    return transcript
       .map((t, i) => `[${i}] ${t.speaker === "user" ? "TRAINEE" : "PERSONA"}: ${t.text}`)
       .join("\n");
+  }
 
+  async judge({ transcript, rubric }: JudgeInput): Promise<RubricVerdict[]> {
     const items = rubric
       .map((item) => `- id: ${item.id}\n  asks: ${item.description}\n  proof required: ${item.evidence}`)
       .join("\n");
@@ -267,7 +394,7 @@ class ModelJudge implements RubricJudge {
       "TRAINEE is the person being graded. PERSONA is the simulated counterpart.",
       "",
       "Transcript:",
-      numbered,
+      this.numbered(transcript),
       "",
       "Rubric items:",
       items,
@@ -275,30 +402,10 @@ class ModelJudge implements RubricJudge {
       'For each item return {"id": string, "met": boolean, "turn": number|null, "quote": string|null, "reason": string|null}.',
       "The quote MUST be copied character for character from the turn you name. Never paraphrase.",
       "If no turn proves the item, set met false and quote null. Do not guess.",
-      'Return only a JSON array, no prose.',
+      "Return only a JSON array, no prose.",
     ].join("\n");
 
-    const response = await client.messages.create({
-      model: this.model,
-      max_tokens: 2000,
-      messages: [{ role: "user", content: prompt }],
-    });
-
-    const text = response.content
-      .map((block) => ("text" in block ? block.text : ""))
-      .join("")
-      .trim();
-
-    const jsonStart = text.indexOf("[");
-    const jsonEnd = text.lastIndexOf("]");
-    let parsed: Array<Record<string, unknown>> = [];
-    if (jsonStart !== -1 && jsonEnd > jsonStart) {
-      try {
-        parsed = JSON.parse(text.slice(jsonStart, jsonEnd + 1));
-      } catch {
-        parsed = [];
-      }
-    }
+    const parsed = parseJsonArray(await this.ask(prompt, 2000));
 
     return rubric.map((item) => {
       const raw = parsed.find((p) => p.id === item.id);
@@ -312,11 +419,7 @@ class ModelJudge implements RubricJudge {
           reason: (raw?.reason as string) ?? "The judge found nothing that proves this item.",
         };
       }
-      const claimed =
-        typeof raw.turn === "number" && typeof raw.quote === "string"
-          ? { turn: raw.turn, quote: raw.quote }
-          : null;
-      const { span, reason } = verifySpan(transcript, claimed);
+      const { span, reason } = verifySpan(transcript, spanFrom(raw));
       return {
         id: item.id,
         description: item.description,
@@ -326,6 +429,85 @@ class ModelJudge implements RubricJudge {
         reason: span ? null : reason,
       };
     });
+  }
+
+  async review(input: ReviewInput): Promise<Review> {
+    const { transcript } = input;
+    const prompt = [
+      "You are reviewing one practice sales or pitch call from its transcript, the way a good sales manager would.",
+      "TRAINEE is the person being reviewed. PERSONA is the simulated counterpart.",
+      "",
+      "Transcript:",
+      this.numbered(transcript),
+      "",
+      "Return a JSON object with three arrays:",
+      '- "good": things the TRAINEE did that worked, each {"text": string, "turn": number|null, "quote": string|null}',
+      '- "bad": things that hurt, same shape',
+      '- "flags": things the TRAINEE said that should be looked at again, each {"kind": one of overclaim|unbacked_claim|promise|pressure|disparagement, "note": string, "turn": number, "quote": string}',
+      "",
+      "A flag is an absolute that cannot be backed, a forecast with nothing behind it, a commitment made on the call,",
+      "pressure tactics, or running down the alternative. Every flag MUST quote the TRAINEE's exact words, character for character.",
+      "Write text and notes in plain, direct sentences addressed to the trainee as 'you'. No headings, no jargon.",
+      "At most four items per array. Return only the JSON object.",
+    ].join("\n");
+
+    const text = await this.ask(prompt, 2500);
+    const start = text.indexOf("{");
+    const end = text.lastIndexOf("}");
+    let raw: Record<string, unknown> = {};
+    if (start !== -1 && end > start) {
+      try {
+        raw = JSON.parse(text.slice(start, end + 1)) as Record<string, unknown>;
+      } catch {
+        raw = {};
+      }
+    }
+
+    const points = (key: "good" | "bad"): ReviewPoint[] =>
+      (Array.isArray(raw[key]) ? (raw[key] as Array<Record<string, unknown>>) : [])
+        .filter((p) => typeof p.text === "string" && (p.text as string).trim())
+        .slice(0, 4)
+        .map((p) => ({ text: (p.text as string).trim(), span: verifySpan(transcript, spanFrom(p)).span }));
+
+    const kinds: FlagKind[] = ["overclaim", "unbacked_claim", "promise", "pressure", "disparagement"];
+    const modelFlags: ReviewFlag[] = (Array.isArray(raw.flags) ? (raw.flags as Array<Record<string, unknown>>) : [])
+      .map((f) => {
+        const { span } = verifySpan(transcript, spanFrom(f));
+        if (!span || !kinds.includes(f.kind as FlagKind) || typeof f.note !== "string") return null;
+        return { kind: f.kind as FlagKind, note: (f.note as string).trim(), span };
+      })
+      .filter((f): f is ReviewFlag => f !== null);
+
+    // The pattern scan runs too, so a promise the model missed is still caught.
+    const seen = new Set(modelFlags.map((f) => `${f.kind}:${f.span.turn}`));
+    const flags = [...modelFlags, ...scanFlags(transcript).filter((f) => !seen.has(`${f.kind}:${f.span.turn}`))];
+
+    const good = points("good");
+    const bad = points("bad");
+    if (good.length === 0 && bad.length === 0) {
+      // The model gave nothing usable; fall back to the deterministic read.
+      const fallback = pointsFrom(input);
+      return { good: fallback.good, bad: fallback.bad, flags };
+    }
+    return { good, bad, flags };
+  }
+}
+
+function spanFrom(raw: Record<string, unknown>): EvidenceSpan | null {
+  return typeof raw.turn === "number" && typeof raw.quote === "string"
+    ? { turn: raw.turn, quote: raw.quote }
+    : null;
+}
+
+function parseJsonArray(text: string): Array<Record<string, unknown>> {
+  const start = text.indexOf("[");
+  const end = text.lastIndexOf("]");
+  if (start === -1 || end <= start) return [];
+  try {
+    const parsed = JSON.parse(text.slice(start, end + 1));
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
   }
 }
 

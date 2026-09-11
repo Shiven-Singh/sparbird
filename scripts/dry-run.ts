@@ -19,12 +19,16 @@ interface Expectation {
   disputed: boolean;
   minPoints?: number;
   maxPointsAllowed?: number;
+  /** Flags the review must raise on this call. */
+  flags?: string[];
 }
 
 /** What each recorded call must produce. A change here should be a deliberate one. */
 const EXPECTED: Record<string, Expectation> = {
-  "investor-strong": { disposition: "scored", disputed: false, minPoints: 8 },
-  "investor-weak": { disposition: "scored", disputed: false, maxPointsAllowed: 2 },
+  // "I will have it to you today" is a commitment made on the line.
+  "investor-strong": { disposition: "scored", disputed: false, minPoints: 8, flags: ["promise"] },
+  // "we are confident the margins will be strong at scale" has nothing behind it.
+  "investor-weak": { disposition: "scored", disputed: false, maxPointsAllowed: 2, flags: ["unbacked_claim"] },
   "investor-contradiction": { disposition: "scored", disputed: true, maxPointsAllowed: 2 },
 };
 
@@ -74,6 +78,14 @@ async function main(): Promise<void> {
       console.log(`  [disputed] ${contradiction.field} claimed "${contradiction.claimed}": ${contradiction.reason}`);
     }
 
+    if (card.review) {
+      for (const p of card.review.good) console.log(`  [good] ${p.text}`);
+      for (const p of card.review.bad) console.log(`  [bad ] ${p.text}`);
+      for (const f of card.review.flags) {
+        console.log(`  [flag] ${f.kind} at turn ${f.span.turn}: "${f.span.quote.slice(0, 60)}"`);
+      }
+    }
+
     const expected = EXPECTED[fixture.fixture_id];
     if (!expected) {
       console.log("  [warn] no expectation recorded for this fixture");
@@ -93,6 +105,16 @@ async function main(): Promise<void> {
     }
     if (record.transcript.length !== outcome.transcript.length) {
       failures.push(`${fixture.fixture_id}: stored transcript lost turns`);
+    }
+    for (const kind of expected.flags ?? []) {
+      if (!card.review?.flags.some((f) => f.kind === kind)) {
+        failures.push(`${fixture.fixture_id}: expected a "${kind}" flag and none was raised`);
+      }
+    }
+    for (const f of card.review?.flags ?? []) {
+      if (!outcome.transcript[f.span.turn]?.text.includes(f.span.quote)) {
+        failures.push(`${fixture.fixture_id}: a flag quotes words that are not in the transcript`);
+      }
     }
   }
 

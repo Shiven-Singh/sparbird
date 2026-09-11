@@ -16,6 +16,7 @@ ENV NODE_ENV=production PORT=8080 HOSTNAME=0.0.0.0
 ENV SPARBIRD_EPHEMERAL=1 SPARBIRD_SEED=1
 COPY --from=build /app/.next/standalone ./
 COPY --from=build /app/.next/static ./.next/static
+COPY --from=build /app/public ./public
 COPY --from=build /app/personas ./personas
 COPY --from=build /app/fixtures ./fixtures
 EXPOSE 8080

@@ -180,6 +180,13 @@ export async function scoreDrill(
   const contradictions = detectContradictions(spec, outcome);
   const disputed = contradictions.length > 0;
   const result = outcome.structuredResult ?? {};
+  const metrics = computeMetrics(outcome.transcript);
+  const review = await judge.review({
+    transcript: outcome.transcript,
+    rubric: spec.rubric,
+    verdicts,
+    metrics,
+  });
 
   return {
     personaId: spec.id,
@@ -194,12 +201,13 @@ export async function scoreDrill(
     itemsWithEvidence: proven.length,
     itemsTotal: spec.rubric.length,
     verdicts,
-    metrics: computeMetrics(outcome.transcript),
+    metrics,
     // The persona's own narrative is only repeated when its result was not contradicted.
     strongestMoment: disputed ? null : ((result.strongest_moment as string) ?? null),
     weakestMoment: disputed ? null : ((result.weakest_moment as string) ?? null),
     personaVerdict: disputed ? null : ((result.persona_verdict as string) ?? null),
     judge: judge.name,
+    review,
   };
 }
 

@@ -11,23 +11,25 @@ export default function FromProfilePage() {
   ) as { name: string; headline: string; about: string; recent_posts: string[] };
 
   return (
-    <div className="px-8 py-8">
+    <div className="px-8 py-8 md:px-10">
       <Link href="/" className="label text-muted hover:text-ink">
         ← All callers
       </Link>
 
-      <header className="mt-4 border-b-2 border-rule pb-6">
-        <h1 className="display text-[28px] text-ink">Build one from a profile</h1>
-        <p className="mt-1.5 max-w-xl text-[15px] leading-relaxed text-ink-2">
+      <header className="rise mt-4">
+        <h1 className="display text-[34px] text-ink">Build one from a profile</h1>
+        <p className="mt-2 max-w-xl text-[15px] leading-relaxed text-ink-2">
           Paste what a real person says about themselves. We read it for how they will push back,
           show the working, and put them on the line.
         </p>
       </header>
 
-      <section className="grid gap-12 py-6 md:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)]">
-        <ProfileForm sample={sample} />
+      <section className="rise rise-2 mt-8 grid gap-6 md:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)]">
+        <div className="sheet px-6 py-6">
+          <ProfileForm sample={sample} />
+        </div>
 
-        <aside className="flex flex-col gap-6 md:border-l md:border-rule-soft md:pl-10">
+        <aside className="flex flex-col gap-6 md:pl-2">
           {[
             [
               "What we read",

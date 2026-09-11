@@ -72,6 +72,12 @@ word for word. If nothing proves it, the note says the call did not show it rath
 you failed. That is why a score always reads as "3 of 4 things landed" and never as a bare
 percentage.
 
+After the score, every call gets a review in three columns: what worked, what hurt, and what to
+watch. The third column is the one a sales manager would care about. It picks out a promise you
+made on the line, an absolute you cannot back, a forecast with nothing behind it, pressure, or
+running down the alternative, and it quotes your exact words with the time they were said. A flag
+that cannot quote the transcript is thrown away.
+
 There is a third thing worth knowing. The call service returns its own summary of how the call
 went, and sometimes that summary does not match the recording. When the two disagree, Sparbird
 keeps the recording, says so on the page, and scores from what was actually said.
