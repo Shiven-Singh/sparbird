@@ -1,9 +1,9 @@
 /**
- * Local store for drill history.
+ * Local store for accounts and drill history.
  *
  * SQLite when better-sqlite3 is available and the filesystem is writable, otherwise an
- * in-memory store so the app still runs on a read-only host. Nothing here is required for a
- * drill to work; losing the store loses history, not correctness.
+ * in-memory store so the app still runs on a read-only or ephemeral host. Losing the store
+ * loses history and accounts, not correctness.
  */
 
 import { mkdirSync } from "node:fs";
@@ -26,27 +26,68 @@ export interface AttemptRecord {
   createdAt: string;
   card: Scorecard;
   transcript: DrillOutcome["transcript"];
+  /** The account that took the call. Null for the seeded samples and for guests. */
+  userId: string | null;
+}
+
+export interface UserRecord {
+  id: string;
+  email: string;
+  name: string;
+  passwordHash: string;
+  /** The plan they picked at signup. Billing is not wired yet; this is intent. */
+  plan: string;
+  createdAt: string;
+}
+
+export interface ListOptions {
+  personaId?: string;
+  /** Records visible to this account: the shared samples plus their own. */
+  viewer?: string | null;
 }
 
 interface Store {
   readonly kind: string;
   save(record: AttemptRecord): void;
-  list(personaId?: string): AttemptRecord[];
+  list(options?: ListOptions): AttemptRecord[];
   get(id: string): AttemptRecord | null;
+  createUser(user: UserRecord): void;
+  getUser(id: string): UserRecord | null;
+  getUserByEmail(email: string): UserRecord | null;
+}
+
+function visible(record: AttemptRecord, viewer: string | null | undefined): boolean {
+  return record.userId === null || record.userId === (viewer ?? null);
 }
 
 class MemoryStore implements Store {
   readonly kind = "memory";
   private readonly rows: AttemptRecord[] = [];
+  private readonly users = new Map<string, UserRecord>();
 
   save(record: AttemptRecord): void {
-    this.rows.unshift(record);
+    const at = this.rows.findIndex((r) => r.id === record.id);
+    if (at >= 0) this.rows[at] = record;
+    else this.rows.unshift(record);
   }
-  list(personaId?: string): AttemptRecord[] {
-    return personaId ? this.rows.filter((r) => r.personaId === personaId) : [...this.rows];
+  list(options: ListOptions = {}): AttemptRecord[] {
+    return this.rows.filter(
+      (r) => (!options.personaId || r.personaId === options.personaId) && visible(r, options.viewer),
+    );
   }
   get(id: string): AttemptRecord | null {
     return this.rows.find((r) => r.id === id) ?? null;
+  }
+  createUser(user: UserRecord): void {
+    this.users.set(user.id, user);
+  }
+  getUser(id: string): UserRecord | null {
+    return this.users.get(id) ?? null;
+  }
+  getUserByEmail(email: string): UserRecord | null {
+    const wanted = email.toLowerCase();
+    for (const u of this.users.values()) if (u.email === wanted) return u;
+    return null;
   }
 }
 
@@ -65,6 +106,16 @@ interface SqliteRow {
   created_at: string;
   card_json: string;
   transcript_json: string;
+  user_id: string | null;
+}
+
+interface UserRow {
+  id: string;
+  email: string;
+  name: string;
+  password_hash: string;
+  plan: string;
+  created_at: string;
 }
 
 function toRecord(row: SqliteRow): AttemptRecord {
@@ -83,6 +134,18 @@ function toRecord(row: SqliteRow): AttemptRecord {
     createdAt: row.created_at,
     card: JSON.parse(row.card_json) as Scorecard,
     transcript: JSON.parse(row.transcript_json) as DrillOutcome["transcript"],
+    userId: row.user_id ?? null,
+  };
+}
+
+function toUser(row: UserRow): UserRecord {
+  return {
+    id: row.id,
+    email: row.email,
+    name: row.name,
+    passwordHash: row.password_hash,
+    plan: row.plan,
+    createdAt: row.created_at,
   };
 }
 
@@ -115,10 +178,25 @@ class SqliteStore implements Store {
         seconds_to_first_number INTEGER,
         created_at TEXT NOT NULL,
         card_json TEXT NOT NULL,
-        transcript_json TEXT NOT NULL
+        transcript_json TEXT NOT NULL,
+        user_id TEXT
       );
       CREATE INDEX IF NOT EXISTS attempts_persona ON attempts (persona_id, created_at DESC);
+      CREATE TABLE IF NOT EXISTS users (
+        id TEXT PRIMARY KEY,
+        email TEXT NOT NULL UNIQUE,
+        name TEXT NOT NULL,
+        password_hash TEXT NOT NULL,
+        plan TEXT NOT NULL DEFAULT 'solo',
+        created_at TEXT NOT NULL
+      );
     `);
+    // A database created before accounts existed has no user_id column.
+    try {
+      this.db.exec("ALTER TABLE attempts ADD COLUMN user_id TEXT");
+    } catch {
+      // Already there.
+    }
   }
 
   save(record: AttemptRecord): void {
@@ -127,8 +205,8 @@ class SqliteStore implements Store {
         `INSERT OR REPLACE INTO attempts
          (id, persona_id, call_id, live, disposition, disputed, points, max_points,
           items_with_evidence, items_total, seconds_to_first_number, created_at,
-          card_json, transcript_json)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+          card_json, transcript_json, user_id)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       )
       .run(
         record.id,
@@ -145,32 +223,54 @@ class SqliteStore implements Store {
         record.createdAt,
         JSON.stringify(record.card),
         JSON.stringify(record.transcript),
+        record.userId,
       );
   }
 
-  list(personaId?: string): AttemptRecord[] {
-    const rows = personaId
+  list(options: ListOptions = {}): AttemptRecord[] {
+    const rows = options.personaId
       ? this.db
           .prepare("SELECT * FROM attempts WHERE persona_id = ? ORDER BY created_at DESC")
-          .all(personaId)
+          .all(options.personaId)
       : this.db.prepare("SELECT * FROM attempts ORDER BY created_at DESC").all();
-    return (rows as SqliteRow[]).map(toRecord);
+    return (rows as SqliteRow[]).map(toRecord).filter((r) => visible(r, options.viewer));
   }
 
   get(id: string): AttemptRecord | null {
     const row = this.db.prepare("SELECT * FROM attempts WHERE id = ?").get(id);
     return row ? toRecord(row as SqliteRow) : null;
   }
+
+  createUser(user: UserRecord): void {
+    this.db
+      .prepare("INSERT INTO users (id, email, name, password_hash, plan, created_at) VALUES (?, ?, ?, ?, ?, ?)")
+      .run(user.id, user.email, user.name, user.passwordHash, user.plan, user.createdAt);
+  }
+
+  getUser(id: string): UserRecord | null {
+    const row = this.db.prepare("SELECT * FROM users WHERE id = ?").get(id);
+    return row ? toUser(row as UserRow) : null;
+  }
+
+  getUserByEmail(email: string): UserRecord | null {
+    const row = this.db.prepare("SELECT * FROM users WHERE email = ?").get(email.toLowerCase());
+    return row ? toUser(row as UserRow) : null;
+  }
 }
 
-let store: Store | null = null;
+/**
+ * One store per process, not one per module instance. Next.js can load this module more than
+ * once (route handlers and server components are bundled separately), and a plain module-level
+ * variable would give each of them its own empty MemoryStore: a call placed through the API
+ * would then be invisible to the page that renders it.
+ */
+const globalForStore = globalThis as unknown as { __sparbirdStore?: Store };
 
 export async function getStore(): Promise<Store> {
-  if (store) return store;
+  if (globalForStore.__sparbirdStore) return globalForStore.__sparbirdStore;
+  let store: Store;
 
   // A read-only or ephemeral host keeps history in memory rather than failing a drill.
-  // Set SPARBIRD_EPHEMERAL=1 anywhere the disk does not survive a restart; the rest is
-  // best-effort detection of the usual serverless runtimes.
   const ephemeral =
     process.env.SPARBIRD_EPHEMERAL === "1" ||
     Boolean(process.env.VERCEL) ||
@@ -180,6 +280,7 @@ export async function getStore(): Promise<Store> {
 
   if (ephemeral) {
     store = new MemoryStore();
+    globalForStore.__sparbirdStore = store;
     return store;
   }
 
@@ -191,11 +292,12 @@ export async function getStore(): Promise<Store> {
   } catch {
     store = new MemoryStore();
   }
+  globalForStore.__sparbirdStore = store;
   return store;
 }
 
 /** Builds the row for one finished drill. Free text is scrubbed of anything phone-shaped. */
-export function toAttemptRecord(outcome: DrillOutcome, card: Scorecard): AttemptRecord {
+export function toAttemptRecord(outcome: DrillOutcome, card: Scorecard, userId: string | null = null): AttemptRecord {
   return {
     id: `${outcome.callId}-${Date.parse(outcome.startedAt) || Date.now()}`,
     personaId: outcome.personaId,
@@ -214,5 +316,6 @@ export function toAttemptRecord(outcome: DrillOutcome, card: Scorecard): Attempt
       ...turn,
       text: redactNumbers(turn.text),
     })),
+    userId,
   };
 }

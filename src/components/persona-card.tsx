@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Avatar } from "@/components/avatar";
+import { TRACKS } from "@/lib/persona";
 import type { PersonaSpec } from "@/lib/types";
 
 export function PersonaCard({ persona }: { persona: PersonaSpec }) {
@@ -19,7 +20,9 @@ export function PersonaCard({ persona }: { persona: PersonaSpec }) {
       <div className="flex-1">
         <h2 className="mt-4 truncate text-[17px] font-medium tracking-[-0.03em] text-text">{persona.display_name}</h2>
         <p className="mt-0.5 truncate text-[13px] text-muted">
-          {persona.source === "profile" ? "read from what they say in public" : persona.audience}
+          {persona.source === "profile"
+            ? "read from what they say in public"
+            : (TRACKS[persona.track ?? "everyone"]?.title ?? persona.audience)}
         </p>
         <p className="mt-3 line-clamp-3 text-[14px] leading-relaxed text-text-2">{persona.summary}</p>
         <p className="mt-2 line-clamp-2 text-[13px] leading-relaxed text-muted">

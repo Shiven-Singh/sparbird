@@ -2,6 +2,7 @@
   "id": "first-principles-investor",
   "display_name": "The First-Principles Investor",
   "source": "archetype",
+  "track": "founders",
   "audience": "founders raising a round",
   "summary": "Impatient, numerate, interrupts anything vague. Agrees to a follow-up only if both objections get a figure.",
   "reads": {

@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { currentUser } from "@/lib/auth";
 import { getStore } from "@/lib/db";
 import { describeSettings, loadPersona } from "@/lib/persona";
 import type { FlagKind, RubricVerdict } from "@/lib/types";
@@ -32,15 +33,17 @@ const FLAG_LABEL: Record<FlagKind, string> = {
   disparagement: "Ran them down",
 };
 
-/** The line, with the words that earned the point under a highlighter. */
-function Marked({ text, quote }: { text: string; quote: string | null }) {
+/** The line, with the words that mattered under a highlighter: white for a point earned,
+ *  amber for something to walk back. */
+function Marked({ text, quote, tone = "good" }: { text: string; quote: string | null; tone?: "good" | "warn" }) {
   if (!quote) return <>{text}</>;
+  const cls = tone === "warn" ? "warn" : undefined;
   const at = text.indexOf(quote);
-  if (at === -1) return <mark>{text}</mark>;
+  if (at === -1) return <mark className={cls}>{text}</mark>;
   return (
     <>
       {text.slice(0, at)}
-      <mark>{quote}</mark>
+      <mark className={cls}>{quote}</mark>
       {text.slice(at + quote.length)}
     </>
   );
@@ -51,6 +54,9 @@ export default async function AttemptPage({ params }: { params: Promise<{ id: st
   const store = await getStore();
   const attempt = store.get(decodeURIComponent(id));
   if (!attempt) notFound();
+  const viewer = await currentUser();
+  // A call belongs to the account that took it; the seeded samples belong to nobody.
+  if (attempt.userId !== null && attempt.userId !== (viewer?.id ?? null)) notFound();
 
   const card = attempt.card;
   const landed = card.verdicts.filter((v) => v.met);
@@ -69,8 +75,8 @@ export default async function AttemptPage({ params }: { params: Promise<{ id: st
   for (const verdict of card.verdicts) {
     if (verdict.span) evidenceByTurn.set(verdict.span.turn, verdict);
   }
-  const flagsByTurn = new Map<number, string>();
-  for (const f of review?.flags ?? []) flagsByTurn.set(f.span.turn, FLAG_LABEL[f.kind]);
+  const flagsByTurn = new Map<number, { label: string; quote: string }>();
+  for (const f of review?.flags ?? []) flagsByTurn.set(f.span.turn, { label: FLAG_LABEL[f.kind], quote: f.span.quote });
 
   const at = (turn: number) => timecode(attempt.transcript[turn]?.offset_seconds ?? null);
 
@@ -103,7 +109,13 @@ export default async function AttemptPage({ params }: { params: Promise<{ id: st
         </div>
         {!unscored ? (
           <div className="flex items-baseline gap-2">
-            <span className="tnum text-[48px] leading-none font-medium tracking-[-0.05em] text-text md:text-[56px]">{landed.length}</span>
+            <span
+              className={`tnum text-[48px] leading-none font-medium tracking-[-0.05em] md:text-[56px] ${
+                landed.length === card.itemsTotal ? "text-good" : landed.length === 0 ? "text-bad" : "text-text"
+              }`}
+            >
+              {landed.length}
+            </span>
             <span className="tnum text-[22px] leading-none text-muted">/ {card.itemsTotal}</span>
             <span className="label ml-2 text-muted">landed</span>
           </div>
@@ -112,7 +124,7 @@ export default async function AttemptPage({ params }: { params: Promise<{ id: st
 
       {card.disputed ? (
         <p className="appear appear--soft d-3 mt-5 text-[13px] leading-relaxed text-text-2">
-          <span className="label mr-2 rounded-sm border border-border px-1.5 py-0.5 text-text">Went with the recording</span>
+          <span className="label mr-2 rounded-sm border border-warn/40 bg-warn-soft px-1.5 py-0.5 text-warn">Went with the recording</span>
           The call service summarized this call in a way the recording does not support, so its
           summary was ignored. Everything on this page comes from what was actually said.
         </p>
@@ -121,23 +133,28 @@ export default async function AttemptPage({ params }: { params: Promise<{ id: st
       {review ? (
         <section className="appear appear--soft d-3 mt-8 grid gap-4 lg:grid-cols-3 lg:gap-6">
           {[
-            ["What worked", review.good, "Nothing landed on this call."],
-            ["What hurt", review.bad, "Nothing on this call worked against you."],
-          ].map(([title, points, empty]) => (
-            <div key={title as string} className="panel rounded-lg">
-              <p className="label border-b border-border-soft px-5 py-3 text-muted">{title as string}</p>
+            ["What worked", review.good, "Nothing landed on this call.", "good"],
+            ["What hurt", review.bad, "Nothing on this call worked against you.", "bad"],
+          ].map(([title, points, empty, tone]) => (
+            <div key={title as string} className={`panel rounded-lg ${tone === "good" ? "panel-good" : "panel-bad"}`}>
+              <p className={`label border-b border-border-soft px-5 py-3 ${tone === "good" ? "text-good" : "text-bad"}`}>
+                {title as string}
+              </p>
               <ul className="divide-y divide-border-soft px-5">
                 {(points as typeof review.good).length === 0 ? (
                   <li className="py-3 text-[13px] text-muted">{empty as string}</li>
                 ) : (
                   (points as typeof review.good).map((p, i) => (
-                    <li key={i} className="py-3">
+                    <li key={i} className="flex gap-2.5 py-3">
+                      <span aria-hidden className={`dot mt-[7px] ${tone === "good" ? "dot-good" : "dot-bad"}`} />
+                      <div className="min-w-0 flex-1">
                       <p className={`text-[14px] leading-relaxed ${title === "What worked" ? "text-text" : "text-text-2"}`}>{p.text}</p>
                       {p.span ? (
                         <a href={`#turn-${p.span.turn}`} className="tnum mt-1 inline-block text-[12px] text-muted transition-colors hover:text-text">
                           at {at(p.span.turn)} →
                         </a>
                       ) : null}
+                      </div>
                     </li>
                   ))
                 )}
@@ -145,8 +162,8 @@ export default async function AttemptPage({ params }: { params: Promise<{ id: st
             </div>
           ))}
 
-          <div className="panel rounded-lg">
-            <p className="label border-b border-border-soft px-5 py-3 text-muted">Watch out</p>
+          <div className="panel panel-warn rounded-lg">
+            <p className="label border-b border-border-soft px-5 py-3 text-warn">Watch out</p>
             <ul className="divide-y divide-border-soft px-5">
               {review.flags.length === 0 ? (
                 <li className="py-3 text-[13px] text-muted">
@@ -155,7 +172,10 @@ export default async function AttemptPage({ params }: { params: Promise<{ id: st
               ) : (
                 review.flags.map((f, i) => (
                   <li key={i} className="py-3">
-                    <p className="label text-text">{FLAG_LABEL[f.kind]}</p>
+                    <p className="label flex items-center gap-2 text-warn">
+                      <span aria-hidden className="dot dot-warn" />
+                      {FLAG_LABEL[f.kind]}
+                    </p>
                     <p className="serif mt-1.5 text-[18px] leading-snug text-text">“{f.span.quote}”</p>
                     <p className="mt-1.5 text-[13px] leading-relaxed text-text-2">{f.note}</p>
                     <a href={`#turn-${f.span.turn}`} className="tnum mt-1 inline-block text-[12px] text-muted transition-colors hover:text-text">
@@ -190,10 +210,24 @@ export default async function AttemptPage({ params }: { params: Promise<{ id: st
                 <span className={`label pt-1 ${mine ? "text-text" : "text-faint"}`}>{mine ? "You" : "Them"}</span>
                 <div className="min-w-0">
                   <p className={`text-[15px] leading-relaxed ${mine ? "text-text" : "text-muted"}`}>
-                    <Marked text={turn.text} quote={evidence?.span?.quote ?? null} />
+                    <Marked
+                      text={turn.text}
+                      quote={evidence?.span?.quote ?? flag?.quote ?? null}
+                      tone={evidence ? "good" : "warn"}
+                    />
                   </p>
-                  {evidence ? <p className="label mt-1.5 text-text">↳ {evidence.description}</p> : null}
-                  {flag ? <p className="label mt-1.5 text-text underline decoration-dotted underline-offset-4">↳ {flag}</p> : null}
+                  {evidence ? (
+                    <p className="label mt-1.5 flex items-center gap-2 text-good">
+                      <span aria-hidden className="dot dot-good" />
+                      {evidence.description}
+                    </p>
+                  ) : null}
+                  {flag ? (
+                    <p className="label mt-1.5 flex items-center gap-2 text-warn">
+                      <span aria-hidden className="dot dot-warn" />
+                      {flag.label}
+                    </p>
+                  ) : null}
                 </div>
               </div>
             );
@@ -207,10 +241,7 @@ export default async function AttemptPage({ params }: { params: Promise<{ id: st
               <ul className="divide-y divide-border-soft px-5">
                 {card.verdicts.map((verdict) => (
                   <li key={verdict.id} className="flex gap-3 py-3">
-                    <span
-                      aria-hidden
-                      className={`mt-1 size-2.5 shrink-0 rounded-sm ${verdict.met ? "bg-text" : "ring-1 ring-muted"}`}
-                    />
+                    <span aria-hidden className={`dot mt-1.5 ${verdict.met ? "dot-good" : "dot-none"}`} />
                     <div className="min-w-0 flex-1">
                       <p className={`text-[14px] leading-snug ${verdict.met ? "text-text" : "text-muted"}`}>
                         {verdict.description}

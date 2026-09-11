@@ -45,10 +45,17 @@ export interface Provenance {
   objection: string;
 }
 
+/** What a person comes here to rehearse. Groups the callers on the home page. */
+export type Track = "founders" | "sales" | "hiring" | "real-estate" | "everyone";
+
 export interface PersonaSpec {
   id: string;
   display_name: string;
   source: "archetype" | "profile";
+  /** Which shelf this caller sits on. */
+  track?: Track;
+  /** The account that built this persona. Absent for the regulars and for guests. */
+  owner?: string | null;
   audience?: string;
   summary?: string;
   /** Human-facing sentences. hidden_state is written for the caller; this is written for the reader. */

@@ -21,12 +21,12 @@ const SKIN: Array<[string, string, string]> = [
 export function Avatar({ seed, className = "size-24" }: { seed: string; className?: string }) {
   const h = hash(seed);
   const hair = h % 5;
-  const skin = SKIN[(h >> 3) % SKIN.length]!;
-  const glasses = (h >> 6) % 3 === 0;
-  const beard = (h >> 8) % 4 === 0 && hair !== 2 && hair !== 3;
-  const smile = (h >> 10) % 2 === 0;
-  const collar = (h >> 12) % 3;
-  const wide = (h >> 14) % 2 === 0;
+  const skin = SKIN[(h >>> 3) % SKIN.length] ?? SKIN[0]!;
+  const glasses = (h >>> 6) % 3 === 0;
+  const beard = (h >>> 8) % 4 === 0 && hair !== 2 && hair !== 3;
+  const smile = (h >>> 10) % 2 === 0;
+  const collar = (h >>> 12) % 3;
+  const wide = (h >>> 14) % 2 === 0;
   const rx = wide ? 25 : 22.5;
   const u = seed.replace(/[^a-z0-9]/gi, "").slice(0, 12) || "a";
 

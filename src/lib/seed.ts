@@ -10,11 +10,12 @@ import { createJudge } from "./judge";
 import { loadPersona } from "./persona";
 import { scoreDrill } from "./score";
 
-let seeded = false;
+// Same reason as the store: one flag per process, not per module instance.
+const globalForSeed = globalThis as unknown as { __sparbirdSeeded?: boolean };
 
 export async function ensureSeeded(): Promise<void> {
-  if (seeded || process.env.SPARBIRD_SEED !== "1") return;
-  seeded = true;
+  if (globalForSeed.__sparbirdSeeded || process.env.SPARBIRD_SEED !== "1") return;
+  globalForSeed.__sparbirdSeeded = true;
 
   const store = await getStore();
   if (store.list().length > 0) return;

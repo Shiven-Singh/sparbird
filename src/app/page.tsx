@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { PersonaCard } from "@/components/persona-card";
-import { loadAllPersonas } from "@/lib/persona";
+import { currentUser } from "@/lib/auth";
+import { TRACKS, loadAllPersonas } from "@/lib/persona";
+import type { Track } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
 
@@ -30,10 +32,23 @@ const PROMISES: Array<[string, string, string]> = [
   ],
 ];
 
-export default function Home() {
-  const personas = loadAllPersonas();
+const ORDER: Track[] = ["founders", "sales", "hiring", "real-estate", "everyone"];
+
+export default async function Home({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
+  const query = await searchParams;
+  const wanted = typeof query.track === "string" && query.track in TRACKS ? (query.track as Track) : null;
+
+  const user = await currentUser();
+  const personas = loadAllPersonas(user?.id ?? null);
   const yours = personas.filter((p) => p.source === "profile");
-  const stock = personas.filter((p) => p.source === "archetype");
+  const regulars = personas.filter((p) => p.source === "archetype");
+
+  const present = ORDER.filter((t) => regulars.some((p) => (p.track ?? "everyone") === t));
+  const shown = wanted ? regulars.filter((p) => (p.track ?? "everyone") === wanted) : regulars;
 
   return (
     <div className="px-5 py-6 md:px-12 md:py-10">
@@ -45,9 +60,10 @@ export default function Home() {
         <h1 className="h1 appear appear--soft d-3 mt-5 text-[32px] text-balance text-text md:text-[48px]">
           Walk in having already had the <em>conversation</em>.
         </h1>
-        <p className="appear appear--soft d-4 mt-4 max-w-[540px] text-[15.5px] leading-[1.55] tracking-[-0.015em] text-muted">
-          Pick the person you are about to face. They listen to your pitch, push back on it in real
-          time, and decide. You walk out knowing exactly where it was unclear.
+        <p className="appear appear--soft d-4 mt-4 max-w-[560px] text-[15.5px] leading-[1.55] tracking-[-0.015em] text-muted">
+          Pitch an investor. Sell to a buyer who has heard it all. Take the phone screen. Ask for
+          the listing. Whoever you have to convince, they call you first, push back the way they
+          will on the day, and you see exactly where you lost them.
         </p>
       </header>
 
@@ -65,40 +81,64 @@ export default function Home() {
         ))}
       </section>
 
-      <section className="appear appear--soft d-6 mt-10">
+      {yours.length > 0 ? (
+        <section className="appear appear--soft d-6 mt-12">
+          <div className="flex flex-wrap items-end justify-between gap-4">
+            <div>
+              <h2 className="text-[20px] font-medium tracking-[-0.03em] text-text">Your audience</h2>
+              <p className="mt-1 text-[14px] text-muted">The people you actually have to convince.</p>
+            </div>
+            <Link href="/from-profile" className="btn btn-ghost">
+              Add another
+            </Link>
+          </div>
+          <div className="mt-5 grid gap-4 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
+            {yours.map((p) => (
+              <PersonaCard key={p.id} persona={p} />
+            ))}
+          </div>
+        </section>
+      ) : null}
+
+      <section className="appear appear--soft d-6 mt-12">
         <div className="flex flex-wrap items-end justify-between gap-4">
           <div>
             <h2 className="text-[20px] font-medium tracking-[-0.03em] text-text">Who is calling you?</h2>
-            <p className="mt-1 text-[14px] text-muted">Each one is hard in a different way, and each one is winnable.</p>
+            <p className="mt-1 text-[14px] text-muted">
+              Pick the conversation you are dreading. Each one is hard in a different way.
+            </p>
           </div>
-          <div className="flex flex-wrap items-center gap-3">
-            <span className="label text-faint">Coming soon: paste a LinkedIn link</span>
-            <Link href="/from-profile" className="btn btn-ghost">
-              Add your own audience
-            </Link>
-          </div>
+          {yours.length === 0 ? (
+            <div className="flex flex-wrap items-center gap-3">
+              <span className="label text-faint">Coming soon: paste a LinkedIn link</span>
+              <Link href="/from-profile" className="btn btn-ghost">
+                Add your own
+              </Link>
+            </div>
+          ) : null}
         </div>
 
-        {yours.length > 0 ? (
-          <>
-            <p className="label mt-6 text-muted">Your audience</p>
-            <div className="mt-3 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-              {yours.map((p) => (
-                <PersonaCard key={p.id} persona={p} />
-              ))}
-            </div>
-            <p className="label mt-8 text-muted">The regulars</p>
-          </>
-        ) : null}
+        <div className="mt-5 flex flex-wrap gap-2">
+          <Link href="/" className={`pill ${wanted === null ? "pill-on" : ""}`} scroll={false}>
+            Everything
+          </Link>
+          {present.map((t) => (
+            <Link key={t} href={`/?track=${t}`} className={`pill ${wanted === t ? "pill-on" : ""}`} scroll={false}>
+              {TRACKS[t]!.title}
+            </Link>
+          ))}
+        </div>
 
-        <div className="mt-3 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-          {stock.map((p) => (
+        {wanted ? <p className="mt-4 text-[14px] text-muted">{TRACKS[wanted]!.blurb}</p> : null}
+
+        <div className="mt-5 grid gap-4 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
+          {shown.map((p) => (
             <PersonaCard key={p.id} persona={p} />
           ))}
         </div>
       </section>
 
-      <p className="appear appear--soft d-7 mt-8 max-w-xl text-[13px] leading-relaxed text-faint">
+      <p className="appear appear--soft d-7 mt-10 max-w-xl text-[13px] leading-relaxed text-faint">
         It only ever calls you. There is no contact list and no way to point it at somebody else,
         and every call opens by saying out loud that it is a rehearsal.
       </p>

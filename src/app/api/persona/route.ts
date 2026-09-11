@@ -1,6 +1,7 @@
 import { writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { NextResponse } from "next/server";
+import { currentUser } from "@/lib/auth";
 import { buildPersonaFromProfile, type RawProfile } from "@/lib/profile";
 
 export const runtime = "nodejs";
@@ -30,9 +31,10 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Nothing readable came through. A headline or a few sentences is enough." }, { status: 400 });
     }
 
+    const user = await currentUser();
     const made: Array<{ id: string; display_name: string }> = [];
     for (const profile of usable) {
-      const persona = buildPersonaFromProfile(profile);
+      const persona = { ...buildPersonaFromProfile(profile), owner: user?.id ?? null };
       try {
         writeFileSync(join(process.cwd(), "personas", `${persona.id}.json`), JSON.stringify(persona, null, 2) + "\n");
       } catch {

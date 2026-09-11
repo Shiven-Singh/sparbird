@@ -1,8 +1,9 @@
 import { NextResponse } from "next/server";
+import { currentUser } from "@/lib/auth";
 import { runDrill } from "@/lib/calle";
 import { getStore, toAttemptRecord } from "@/lib/db";
 import { createJudge } from "@/lib/judge";
-import { isIntentKey, isToneKey, listPersonaIds, loadPersona } from "@/lib/persona";
+import { canSee, isIntentKey, isToneKey, listPersonaIds, loadPersona } from "@/lib/persona";
 import { scoreDrill } from "@/lib/score";
 import type { CallSettings } from "@/lib/types";
 
@@ -28,7 +29,12 @@ export async function POST(request: Request) {
     const intent = isIntentKey(body.intent) ? body.intent : "default";
     const settings: CallSettings | null = tone === "default" && intent === "default" ? null : { tone, intent };
 
+    const user = await currentUser();
     const persona = loadPersona(personaId);
+    if (!canSee(persona, user?.id ?? null)) {
+      return NextResponse.json({ error: "We do not have that person on file." }, { status: 404 });
+    }
+
     const outcome = await runDrill(persona, {
       fixtureId: body.fixtureId,
       settings,
@@ -36,7 +42,7 @@ export async function POST(request: Request) {
     });
 
     const card = await scoreDrill(persona, outcome, createJudge());
-    const record = toAttemptRecord(outcome, card);
+    const record = toAttemptRecord(outcome, card, user?.id ?? null);
     const store = await getStore();
     store.save(record);
 

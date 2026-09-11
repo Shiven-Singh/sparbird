@@ -18,6 +18,14 @@
   --color-mark: #ffffff;
   --color-mark-ink: #000000;
 
+  /* semantic, and nothing else is colored: landed, hurt, watch out */
+  --color-good: #5ad19a;
+  --color-good-soft: rgba(90, 209, 154, 0.12);
+  --color-bad: #ff7a6b;
+  --color-bad-soft: rgba(255, 122, 107, 0.12);
+  --color-warn: #f5c451;
+  --color-warn-soft: rgba(245, 196, 81, 0.14);
+
   --font-sans: var(--font-inter), system-ui, -apple-system, "Segoe UI", sans-serif;
   --font-serif: var(--font-instrument), "Times New Roman", Times, serif;
 
@@ -253,6 +261,23 @@ mark {
   box-decoration-break: clone;
   -webkit-box-decoration-break: clone;
 }
+/* the words that should be walked back */
+mark.warn {
+  background: var(--color-warn);
+  color: #1a1400;
+}
+
+/* a panel that carries a verdict: a hairline of color on the top edge only */
+.panel-good { border-top: 2px solid var(--color-good); }
+.panel-bad { border-top: 2px solid var(--color-bad); }
+.panel-warn { border-top: 2px solid var(--color-warn); }
+
+/* a small status dot */
+.dot { display: inline-block; width: 8px; height: 8px; border-radius: 999px; flex: 0 0 auto; }
+.dot-good { background: var(--color-good); }
+.dot-bad { background: var(--color-bad); }
+.dot-warn { background: var(--color-warn); }
+.dot-none { box-shadow: inset 0 0 0 1px var(--color-muted); }
 
 .tnum {
   font-variant-numeric: tabular-nums;

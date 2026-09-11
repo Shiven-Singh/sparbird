@@ -3,7 +3,8 @@ import { notFound } from "next/navigation";
 import { Avatar } from "@/components/avatar";
 import { TakeCall } from "@/components/take-call";
 import { isLive, previewDrill } from "@/lib/calle";
-import { INTENTS, TONES, isIntentKey, isToneKey, listPersonaIds, loadPersona } from "@/lib/persona";
+import { currentUser } from "@/lib/auth";
+import { INTENTS, TONES, canSee, isIntentKey, isToneKey, listPersonaIds, loadPersona } from "@/lib/persona";
 import type { CallSettings } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
@@ -28,6 +29,8 @@ export default async function DrillPage({
   const settings: CallSettings | null = tone === "default" && intent === "default" ? null : { tone, intent };
 
   const persona = loadPersona(id);
+  const user = await currentUser();
+  if (!canSee(persona, user?.id ?? null)) notFound();
   const preview = previewDrill(persona, undefined, settings);
   const live = isLive();
   const provenance = persona.provenance ?? [];

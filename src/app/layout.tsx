@@ -2,6 +2,8 @@ import type { Metadata, Viewport } from "next";
 import { Instrument_Serif, Inter } from "next/font/google";
 import Link from "next/link";
 import { Mark, Wordmark } from "@/components/logo";
+import { SignOut } from "@/components/sign-out";
+import { currentUser } from "@/lib/auth";
 import { isLive } from "@/lib/calle";
 import { getStore } from "@/lib/db";
 import { loadPersona } from "@/lib/persona";
@@ -46,8 +48,9 @@ function ago(iso: string): string {
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   await ensureSeeded();
   const live = isLive();
+  const user = await currentUser();
   const store = await getStore();
-  const recent = store.list().slice(0, 10);
+  const recent = store.list({ viewer: user?.id ?? null }).slice(0, 10);
 
   const names = new Map<string, string>();
   for (const a of recent) {
@@ -71,12 +74,18 @@ export default async function RootLayout({ children }: { children: React.ReactNo
                 <Mark className="size-7" />
               </Link>
               <div className="flex items-center gap-2">
-                <Link href="/from-profile" className="pill h-9 px-3">
-                  Audience
+                <Link href="/pricing" className="pill h-9 px-3">
+                  Pricing
                 </Link>
-                <Link href="/calls" className="pill h-9 px-3">
-                  Calls
-                </Link>
+                {user ? (
+                  <Link href="/calls" className="pill h-9 px-3">
+                    Calls
+                  </Link>
+                ) : (
+                  <Link href="/signin" className="pill h-9 px-3">
+                    Sign in
+                  </Link>
+                )}
                 <Link href="/" className="btn btn-solid h-9 px-3">
                   New
                 </Link>
@@ -119,14 +128,14 @@ export default async function RootLayout({ children }: { children: React.ReactNo
                         >
                           <span
                             aria-hidden
-                            className={`mt-1.5 size-2 shrink-0 rounded-full ${
+                            className={`dot mt-1.5 ${
                               a.disposition === "unscored"
-                                ? "ring-1 ring-muted"
+                                ? "dot-none"
                                 : a.itemsWithEvidence === a.itemsTotal
-                                  ? "bg-text"
+                                  ? "dot-good"
                                   : a.itemsWithEvidence === 0
-                                    ? "ring-1 ring-text"
-                                    : "bg-muted"
+                                    ? "dot-bad"
+                                    : "dot-none"
                             }`}
                           />
                           <span className="min-w-0 flex-1">
@@ -137,6 +146,12 @@ export default async function RootLayout({ children }: { children: React.ReactNo
                               {a.disposition === "unscored"
                                 ? "not graded"
                                 : `${a.itemsWithEvidence} of ${a.itemsTotal} landed`}
+                              {a.card.review && a.card.review.flags.length > 0 ? (
+                                <span className="text-warn">
+                                  {" · "}
+                                  {a.card.review.flags.length} to watch
+                                </span>
+                              ) : null}
                               {a.disputed ? " · disputed" : ""}
                             </span>
                           </span>
@@ -149,10 +164,25 @@ export default async function RootLayout({ children }: { children: React.ReactNo
               </div>
 
               <div className="border-t border-border-soft px-5 py-4">
-                <p className="flex items-center gap-2 text-[12px] text-muted">
-                  <span aria-hidden className={`size-2 rounded-full ${live ? "bg-text" : "ring-1 ring-muted"}`} />
+                <p className="mb-3 flex items-center gap-2 text-[12px] text-muted">
+                  <span aria-hidden className={`dot ${live ? "dot-good" : "dot-none"}`} />
                   {live ? "Your phone can ring" : "Nothing will ring"}
                 </p>
+                {user ? (
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="min-w-0 truncate text-[13px] text-text-2">{user.name}</span>
+                    <SignOut className="label text-muted transition-colors hover:text-text" />
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-3">
+                    <Link href="/signin" className="label text-muted transition-colors hover:text-text">
+                      Sign in
+                    </Link>
+                    <Link href="/pricing" className="label text-text">
+                      Pricing
+                    </Link>
+                  </div>
+                )}
               </div>
             </div>
           </aside>

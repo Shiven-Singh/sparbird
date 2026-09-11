@@ -38,6 +38,8 @@ const personaSchema = z.object({
   id: z.string().min(1),
   display_name: z.string().min(1),
   source: z.enum(["archetype", "profile"]),
+  track: z.enum(["founders", "sales", "hiring", "real-estate", "everyone"]).optional(),
+  owner: z.string().nullable().optional(),
   audience: z.string().optional(),
   summary: z.string().optional(),
   reads: z
@@ -89,9 +91,26 @@ export function loadPersona(id: string): PersonaSpec {
   return parsed;
 }
 
-export function loadAllPersonas(): PersonaSpec[] {
-  return listPersonaIds().map(loadPersona);
+/** Whether a viewer may see this persona: the regulars are public, a built one belongs to its owner. */
+export function canSee(spec: PersonaSpec, viewer: string | null): boolean {
+  if (spec.source === "archetype") return true;
+  if (!spec.owner) return true;
+  return spec.owner === viewer;
 }
+
+export function loadAllPersonas(viewer: string | null = null): PersonaSpec[] {
+  return listPersonaIds()
+    .map(loadPersona)
+    .filter((spec) => canSee(spec, viewer));
+}
+
+export const TRACKS: Record<string, { title: string; blurb: string }> = {
+  founders: { title: "Raise money", blurb: "Pitch the investor before you pitch the investor." },
+  sales: { title: "Sell", blurb: "The buyer who has heard every pitch, on the line first." },
+  hiring: { title: "Get hired", blurb: "The screen, the night before the screen." },
+  "real-estate": { title: "Win the listing", blurb: "The seller who fired the last agent, before you knock." },
+  everyone: { title: "Say the hard thing", blurb: "The conversation you have been putting off." },
+};
 
 /** How the caller comes at you. "default" means as the persona is written. */
 export const TONES: Record<string, { label: string; brief: string }> = {

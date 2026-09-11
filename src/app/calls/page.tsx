@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Avatar } from "@/components/avatar";
+import { currentUser } from "@/lib/auth";
 import { getStore } from "@/lib/db";
 import { loadPersona } from "@/lib/persona";
 
@@ -15,8 +16,9 @@ function when(iso: string): string {
 }
 
 export default async function CallsPage() {
+  const user = await currentUser();
   const store = await getStore();
-  const attempts = store.list();
+  const attempts = store.list({ viewer: user?.id ?? null });
 
   const names = new Map<string, string>();
   for (const a of attempts) {
@@ -74,21 +76,39 @@ export default async function CallsPage() {
                   <span className="tnum block text-[12px] text-muted sm:hidden">{when(a.createdAt)}</span>
                 </span>
               </span>
-              <span className="tnum text-right text-[14px] text-text">
+              <span className="tnum flex items-center justify-end gap-2 text-right text-[14px] text-text">
                 {a.disposition === "unscored" ? (
                   <span className="text-muted">not graded</span>
                 ) : (
                   <>
+                    <span
+                      aria-hidden
+                      className={`dot ${
+                        a.itemsWithEvidence === a.itemsTotal
+                          ? "dot-good"
+                          : a.itemsWithEvidence === 0
+                            ? "dot-bad"
+                            : "dot-none"
+                      }`}
+                    />
                     {a.itemsWithEvidence} of {a.itemsTotal}
-                    {a.disputed ? <span className="label ml-2 hidden text-muted sm:inline">disputed</span> : null}
+                    {a.disputed ? <span className="label ml-1 hidden text-warn sm:inline">disputed</span> : null}
                   </>
                 )}
               </span>
               <span className="tnum hidden text-right text-[14px] text-text-2 sm:block">
                 {a.disposition === "unscored" ? "" : `${a.points} / ${a.maxPoints}`}
               </span>
-              <span className="tnum hidden text-right text-[14px] text-text-2 sm:block">
-                {a.card.review ? (a.card.review.flags.length === 0 ? <span className="text-muted">none</span> : a.card.review.flags.length) : ""}
+              <span className="tnum hidden text-right text-[14px] sm:block">
+                {a.card.review ? (
+                  a.card.review.flags.length === 0 ? (
+                    <span className="text-muted">none</span>
+                  ) : (
+                    <span className="text-warn">{a.card.review.flags.length}</span>
+                  )
+                ) : (
+                  ""
+                )}
               </span>
               <span className="label hidden text-right text-muted sm:block">{a.live ? "real" : "recorded"}</span>
             </Link>

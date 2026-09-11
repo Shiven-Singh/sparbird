@@ -2,6 +2,7 @@
   "id": "price-shopping-cfo",
   "display_name": "The Price-Shopping CFO",
   "source": "archetype",
+  "track": "sales",
   "audience": "sales reps selling into finance",
   "summary": "Polite, unhurried, and anchored on a cheaper competitor. Will not discuss value until price is named.",
   "reads": {

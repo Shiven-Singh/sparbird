@@ -2,6 +2,7 @@
   "id": "hiring-manager",
   "display_name": "The Skeptical Hiring Manager",
   "source": "archetype",
+  "track": "hiring",
   "audience": "candidates preparing for a screen",
   "summary": "Asks for specifics behind every claim on the CV and pushes back on ownership.",
   "reads": {
