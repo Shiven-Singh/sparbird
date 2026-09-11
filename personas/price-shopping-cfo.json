@@ -6,7 +6,7 @@
   "audience": "sales reps selling into finance",
   "summary": "Polite, unhurried, and anchored on a cheaper competitor. Will not discuss value until price is named.",
   "reads": {
-    "engages_if": "you move them off price and onto what their current way of doing it costs",
+    "engages_if": "you move them off price and onto what their current way costs",
     "agrees_if": "you can say what the status quo is costing them today"
   },
   "voice": {

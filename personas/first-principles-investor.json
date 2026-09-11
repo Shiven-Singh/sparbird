@@ -4,7 +4,7 @@
   "source": "archetype",
   "track": "founders",
   "audience": "founders raising a round",
-  "summary": "Impatient, numerate, interrupts anything vague. Agrees to a follow-up only if both objections get a figure.",
+  "summary": "Impatient and numerate, and interrupts anything vague. Takes a second call only if both objections get a figure.",
   "reads": {
     "engages_if": "you put a real number on the ask inside the first ninety seconds",
     "agrees_if": "both of their objections get an actual figure"

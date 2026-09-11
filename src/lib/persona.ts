@@ -105,11 +105,11 @@ export function loadAllPersonas(viewer: string | null = null): PersonaSpec[] {
 }
 
 export const TRACKS: Record<string, { title: string; blurb: string }> = {
-  founders: { title: "Raise money", blurb: "Pitch the investor before you pitch the investor." },
-  sales: { title: "Sell", blurb: "The buyer who has heard every pitch, on the line first." },
-  hiring: { title: "Get hired", blurb: "The screen, the night before the screen." },
-  "real-estate": { title: "Win the listing", blurb: "The seller who fired the last agent, before you knock." },
-  everyone: { title: "Say the hard thing", blurb: "The conversation you have been putting off." },
+  founders: { title: "Raise money", blurb: "You pitch the investor before you pitch the investor." },
+  sales: { title: "Sell", blurb: "The buyer has heard this pitch before, and probably last week." },
+  hiring: { title: "Get hired", blurb: "You take the phone screen the night before the phone screen." },
+  "real-estate": { title: "Win the listing", blurb: "The seller just fired an agent and is not convinced you are different." },
+  everyone: { title: "Say the hard thing", blurb: "You say the thing you have been putting off, to the person who does not want to hear it." },
 };
 
 /** How the caller comes at you. "default" means as the persona is written. */

@@ -4,7 +4,7 @@
   "source": "archetype",
   "track": "hiring",
   "audience": "candidates preparing for a screen",
-  "summary": "Asks for specifics behind every claim on the CV and pushes back on ownership.",
+  "summary": "Wants the specifics behind every claim on your CV, and pushes back on who actually did the work.",
   "reads": {
     "engages_if": "you describe one decision you made yourself, not one your team made",
     "agrees_if": "you own a real decision and admit one thing that did not work"

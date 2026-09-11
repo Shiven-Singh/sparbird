@@ -16,18 +16,18 @@ function Star() {
 
 const PROMISES: Array<[string, string, string]> = [
   [
-    "They listen, then come back at you",
-    "The person on the line follows what you actually said and pushes back on it in their own words. Not a script, not a quiz.",
+    "You get argued with, not quizzed.",
+    "They listen to what you actually said and come back at that, in their own words. There is no script to fall back on and no right answer to guess.",
     "M4 5h16v10H9l-5 4V5Zm3 3v2h10V8H7Zm0 4v2h6v-2H7Z",
   ],
   [
-    "A real line, a real scenario",
-    "Your own phone, five minutes, the pressure of a live conversation. The way it will feel on the day, before the day.",
+    "You feel it before it costs you anything.",
+    "Your own phone rings and you have five minutes with nothing in front of you. These are the same nerves you will have on the day, except this one does not count.",
     "M12 3a7 7 0 0 1 7 7v1h-2v-1a5 5 0 0 0-10 0v1H5v-1a7 7 0 0 1 7-7Zm-6 9h12a1 1 0 0 1 1 1v6a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-6a1 1 0 0 1 1-1Z",
   ],
   [
-    "Clarity on the pitch itself",
-    "Every line that landed or lost them is quoted back with the time it happened, so you fix the words, not the feeling.",
+    "You find out which sentence lost them.",
+    "Afterwards every line that worked or hurt is quoted back to you with the time it happened. You go and fix words, instead of a vague feeling that it went badly.",
     "M5 4h14v2H5V4Zm0 5h14v2H5V9Zm0 5h9v2H5v-2Zm0 5h6v2H5v-2Z",
   ],
 ];
@@ -55,15 +55,15 @@ export default async function Home({
       <header className="max-w-3xl">
         <span className="badge appear appear--pop d-2">
           <Star />
-          Rehearse the call before it counts
+          Have the call once before it counts
         </span>
         <h1 className="h1 appear appear--soft d-3 mt-5 text-[32px] text-balance text-text md:text-[48px]">
           Walk in having already had the <em>conversation</em>.
         </h1>
         <p className="appear appear--soft d-4 mt-4 max-w-[560px] text-[15.5px] leading-[1.55] tracking-[-0.015em] text-muted">
-          Pitch an investor. Sell to a buyer who has heard it all. Take the phone screen. Ask for
-          the listing. Whoever you have to convince, they call you first, push back the way they
-          will on the day, and you see exactly where you lost them.
+          Your phone rings, and it is the investor, or the buyer who heard your pitch from someone
+          else last week, or the hiring manager, or the seller whose listing just died. They push
+          back the way they will on the day. Then you find out which of your sentences lost them.
         </p>
       </header>
 
@@ -86,7 +86,7 @@ export default async function Home({
           <div className="flex flex-wrap items-end justify-between gap-4">
             <div>
               <h2 className="text-[20px] font-medium tracking-[-0.03em] text-text">Your audience</h2>
-              <p className="mt-1 text-[14px] text-muted">The people you actually have to convince.</p>
+              <p className="mt-1 text-[14px] text-muted">These are the people you actually have to convince.</p>
             </div>
             <Link href="/from-profile" className="btn btn-ghost">
               Add another
@@ -110,7 +110,7 @@ export default async function Home({
           </div>
           {yours.length === 0 ? (
             <div className="flex flex-wrap items-center gap-3">
-              <span className="label text-faint">Coming soon: paste a LinkedIn link</span>
+              <span className="text-[13px] text-faint">Soon you will be able to build one from someone&rsquo;s profile.</span>
               <Link href="/from-profile" className="btn btn-ghost">
                 Add your own
               </Link>

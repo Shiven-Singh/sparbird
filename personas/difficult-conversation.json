@@ -4,7 +4,7 @@
   "source": "archetype",
   "track": "everyone",
   "audience": "anyone who has to say something hard out loud",
-  "summary": "Someone who will be hurt, defensive or disappointed by what you have to say. Raising the rate, ending the contract, delivering the news.",
+  "summary": "Someone who will be hurt or defensive when they hear it. Raising the rate, ending the contract, giving bad news.",
   "reads": {
     "engages_if": "you say the actual thing in the first minute instead of circling it",
     "agrees_if": "you hold the position while still treating them like a person"

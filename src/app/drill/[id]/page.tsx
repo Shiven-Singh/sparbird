@@ -13,6 +13,11 @@ function cap(s: string): string {
   return s.charAt(0).toUpperCase() + s.slice(1);
 }
 
+/** Small counts read as words when they sit in a sentence. */
+function spell(n: number): string {
+  return ["no", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine"][n] ?? String(n);
+}
+
 export default async function DrillPage({
   params,
   searchParams,
@@ -61,10 +66,12 @@ export default async function DrillPage({
             <h1 className="h1 text-[26px] text-text md:text-[32px]">{persona.display_name}</h1>
             <p className="mt-2 text-[15px] leading-relaxed text-text-2">{persona.summary}</p>
             <p className="mt-2 text-[13px] leading-relaxed text-muted">
-              They listen to what you say and come back at it in their own words. Warms up only if{" "}
-              {persona.reads?.engages_if ?? persona.hidden_state.engages_only_if}. Agrees to a next step
-              only if {persona.reads?.agrees_if ?? persona.hidden_state.concession}. Expect to be pushed
-              at least {persona.hidden_state.scripted_objections.length} times, and you will not know when.
+              They listen to what you say and come back at it in their own words. They do not open up
+              until {persona.reads?.engages_if ?? persona.hidden_state.engages_only_if}, and they will
+              not agree to a next step unless{" "}
+              {persona.reads?.agrees_if ?? persona.hidden_state.concession}. They will push back on you
+              at least {spell(persona.hidden_state.scripted_objections.length)} times, and you will not
+              know when it is coming.
             </p>
           </div>
         </div>
@@ -73,7 +80,7 @@ export default async function DrillPage({
           <p className="max-w-xs text-[12px] leading-relaxed text-muted">
             {live
               ? `Rings ${preview.destinationMasked}, your own number and nobody else's.`
-              : "Nothing will ring. A call that already happened, scored the way a real one is."}
+              : "Nothing will ring. This plays a call that already happened, and scores it the way it would score yours."}
           </p>
         </div>
       </header>

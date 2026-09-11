@@ -26,7 +26,7 @@ export function PersonaCard({ persona }: { persona: PersonaSpec }) {
         </p>
         <p className="mt-3 line-clamp-3 text-[14px] leading-relaxed text-text-2">{persona.summary}</p>
         <p className="mt-2 line-clamp-2 text-[13px] leading-relaxed text-muted">
-          Warms up only if {persona.reads?.engages_if ?? persona.hidden_state.engages_only_if}.
+          They do not open up until {persona.reads?.engages_if ?? persona.hidden_state.engages_only_if}.
         </p>
       </div>
 
