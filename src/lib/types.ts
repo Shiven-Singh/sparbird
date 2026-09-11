@@ -62,6 +62,12 @@ export interface PersonaSpec {
   max_minutes: number;
 }
 
+/** How the caller comes at you on one particular call. Chosen before dialling. */
+export interface CallSettings {
+  tone: string;
+  intent: string;
+}
+
 export type Speaker = "bot" | "user" | "unknown";
 
 /**
@@ -96,6 +102,8 @@ export interface DrillOutcome {
   failureCode: string | null;
   failureMessage: string | null;
   startedAt: string;
+  /** Set when the trainee chose a tone or intent for this call. */
+  settings?: CallSettings;
 }
 
 export interface EvidenceSpan {
@@ -185,4 +193,6 @@ export interface Scorecard {
   judge: string;
   /** Absent on cards scored before reviews existed. */
   review?: Review;
+  /** How the caller was told to come at the trainee, when a choice was made. */
+  settings?: CallSettings;
 }

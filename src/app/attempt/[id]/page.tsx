@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getStore } from "@/lib/db";
-import { loadPersona } from "@/lib/persona";
+import { describeSettings, loadPersona } from "@/lib/persona";
 import type { FlagKind, RubricVerdict } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
@@ -56,6 +56,7 @@ export default async function AttemptPage({ params }: { params: Promise<{ id: st
   const landed = card.verdicts.filter((v) => v.met);
   const unscored = card.disposition === "unscored";
   const review = card.review;
+  const settingsLine = describeSettings(card.settings);
 
   let who = attempt.personaId;
   try {
@@ -81,8 +82,10 @@ export default async function AttemptPage({ params }: { params: Promise<{ id: st
         ? `What did it: ${lower(card.strongestMoment)}`
         : "";
 
+  const rowCols = "grid-cols-[38px_42px_minmax(0,1fr)] sm:grid-cols-[48px_52px_minmax(0,1fr)]";
+
   return (
-    <div className="px-8 py-10 md:px-12">
+    <div className="px-5 py-6 md:px-12 md:py-10">
       <div className="appear appear--scale d-1 flex flex-wrap items-center gap-3">
         <Link href={`/drill/${attempt.personaId}`} className="pill">
           ← {who}
@@ -90,16 +93,17 @@ export default async function AttemptPage({ params }: { params: Promise<{ id: st
         <span className="label text-muted">{attempt.live ? "a real call" : "a recorded call"}</span>
       </div>
 
-      <header className="appear appear--soft d-2 mt-6 flex flex-wrap items-start justify-between gap-6">
+      <header className="appear appear--soft d-2 mt-6 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between sm:gap-6">
         <div className="max-w-2xl">
-          <h1 className="h1 text-[36px] text-text">
+          <h1 className="h1 text-[28px] text-text md:text-[36px]">
             {unscored ? <>We are not grading <em>this</em> one.</> : <Outcome verdict={card.personaVerdict} landed={landed.length} total={card.itemsTotal} />}
           </h1>
           {subtitle ? <p className="mt-3 text-[15px] leading-relaxed text-muted">{subtitle}</p> : null}
+          {settingsLine ? <p className="mt-1.5 text-[13px] text-faint">{settingsLine}</p> : null}
         </div>
         {!unscored ? (
           <div className="flex items-baseline gap-2">
-            <span className="tnum text-[56px] leading-none font-medium tracking-[-0.05em] text-text">{landed.length}</span>
+            <span className="tnum text-[48px] leading-none font-medium tracking-[-0.05em] text-text md:text-[56px]">{landed.length}</span>
             <span className="tnum text-[22px] leading-none text-muted">/ {card.itemsTotal}</span>
             <span className="label ml-2 text-muted">landed</span>
           </div>
@@ -115,7 +119,7 @@ export default async function AttemptPage({ params }: { params: Promise<{ id: st
       ) : null}
 
       {review ? (
-        <section className="appear appear--soft d-3 mt-8 grid gap-6 lg:grid-cols-3">
+        <section className="appear appear--soft d-3 mt-8 grid gap-4 lg:grid-cols-3 lg:gap-6">
           {[
             ["What worked", review.good, "Nothing landed on this call."],
             ["What hurt", review.bad, "Nothing on this call worked against you."],
@@ -167,7 +171,7 @@ export default async function AttemptPage({ params }: { params: Promise<{ id: st
 
       <section className="appear appear--soft d-4 mt-6 grid gap-6 lg:grid-cols-[minmax(0,1fr)_280px]">
         <div className="panel rounded-lg">
-          <div className="label grid grid-cols-[48px_52px_minmax(0,1fr)] gap-x-4 border-b border-border-soft px-6 py-3 text-muted">
+          <div className={`label grid ${rowCols} gap-x-3 border-b border-border-soft px-4 py-3 text-muted sm:gap-x-4 sm:px-6`}>
             <span>Time</span>
             <span>Who</span>
             <span>The call</span>
@@ -180,11 +184,11 @@ export default async function AttemptPage({ params }: { params: Promise<{ id: st
               <div
                 key={index}
                 id={`turn-${index}`}
-                className="grid scroll-mt-6 grid-cols-[48px_52px_minmax(0,1fr)] gap-x-4 border-b border-border-soft px-6 py-3.5 last:border-b-0"
+                className={`grid ${rowCols} scroll-mt-6 gap-x-3 border-b border-border-soft px-4 py-3.5 last:border-b-0 sm:gap-x-4 sm:px-6`}
               >
                 <span className="tnum pt-0.5 text-[12px] text-faint">{timecode(turn.offset_seconds)}</span>
                 <span className={`label pt-1 ${mine ? "text-text" : "text-faint"}`}>{mine ? "You" : "Them"}</span>
-                <div>
+                <div className="min-w-0">
                   <p className={`text-[15px] leading-relaxed ${mine ? "text-text" : "text-muted"}`}>
                     <Marked text={turn.text} quote={evidence?.span?.quote ?? null} />
                   </p>

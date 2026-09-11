@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Tile } from "@/components/tile";
+import { Avatar } from "@/components/avatar";
 import { getStore } from "@/lib/db";
 import { loadPersona } from "@/lib/persona";
 
@@ -28,13 +28,13 @@ export default async function CallsPage() {
     }
   }
 
-  const cols = "grid-cols-[130px_minmax(0,1fr)_120px_90px_90px_90px]";
+  const cols = "grid-cols-[minmax(0,1fr)_96px] sm:grid-cols-[130px_minmax(0,1fr)_110px_80px_70px_80px]";
 
   return (
-    <div className="px-8 py-10 md:px-12">
+    <div className="px-5 py-6 md:px-12 md:py-10">
       <header className="appear appear--soft d-1 flex flex-wrap items-end justify-between gap-6">
         <div>
-          <h1 className="h1 text-[36px] text-text">
+          <h1 className="h1 text-[30px] text-text md:text-[36px]">
             Every call you have <em>taken</em>.
           </h1>
           <p className="mt-3 text-[15px] text-muted">
@@ -50,24 +50,29 @@ export default async function CallsPage() {
 
       {attempts.length > 0 ? (
         <section className="panel appear appear--soft d-2 mt-8 rounded-lg">
-          <div className={`label grid ${cols} gap-4 border-b border-border-soft px-6 py-3 text-muted`}>
-            <span>When</span>
+          <div className={`label grid ${cols} gap-4 border-b border-border-soft px-4 py-3 text-muted sm:px-6`}>
+            <span className="hidden sm:block">When</span>
             <span>Who</span>
             <span className="text-right">Landed</span>
-            <span className="text-right">Points</span>
-            <span className="text-right">Flags</span>
-            <span className="text-right">Line</span>
+            <span className="hidden text-right sm:block">Points</span>
+            <span className="hidden text-right sm:block">Flags</span>
+            <span className="hidden text-right sm:block">Line</span>
           </div>
           {attempts.map((a) => (
             <Link
               key={a.id}
               href={`/attempt/${encodeURIComponent(a.id)}`}
-              className={`grid ${cols} items-center gap-4 border-b border-border-soft px-6 py-3 transition-colors last:border-b-0 hover:bg-panel-2`}
+              className={`grid ${cols} items-center gap-4 border-b border-border-soft px-4 py-3 transition-colors last:border-b-0 hover:bg-panel-2 sm:px-6`}
             >
-              <span className="tnum text-[13px] text-muted">{when(a.createdAt)}</span>
+              <span className="tnum hidden text-[13px] text-muted sm:block">{when(a.createdAt)}</span>
               <span className="flex min-w-0 items-center gap-3">
-                <Tile name={names.get(a.personaId) ?? a.personaId} className="!size-8 !text-[12px]" />
-                <span className="truncate text-[15px] font-medium tracking-[-0.02em] text-text">{names.get(a.personaId) ?? a.personaId}</span>
+                <span className="grid size-9 shrink-0 place-items-center rounded-md border border-border-soft bg-panel">
+                  <Avatar seed={a.personaId} className="size-8" />
+                </span>
+                <span className="min-w-0">
+                  <span className="block truncate text-[15px] font-medium tracking-[-0.02em] text-text">{names.get(a.personaId) ?? a.personaId}</span>
+                  <span className="tnum block text-[12px] text-muted sm:hidden">{when(a.createdAt)}</span>
+                </span>
               </span>
               <span className="tnum text-right text-[14px] text-text">
                 {a.disposition === "unscored" ? (
@@ -75,17 +80,17 @@ export default async function CallsPage() {
                 ) : (
                   <>
                     {a.itemsWithEvidence} of {a.itemsTotal}
-                    {a.disputed ? <span className="label ml-2 text-muted">disputed</span> : null}
+                    {a.disputed ? <span className="label ml-2 hidden text-muted sm:inline">disputed</span> : null}
                   </>
                 )}
               </span>
-              <span className="tnum text-right text-[14px] text-text-2">
+              <span className="tnum hidden text-right text-[14px] text-text-2 sm:block">
                 {a.disposition === "unscored" ? "" : `${a.points} / ${a.maxPoints}`}
               </span>
-              <span className="tnum text-right text-[14px] text-text-2">
+              <span className="tnum hidden text-right text-[14px] text-text-2 sm:block">
                 {a.card.review ? (a.card.review.flags.length === 0 ? <span className="text-muted">none</span> : a.card.review.flags.length) : ""}
               </span>
-              <span className="label text-right text-muted">{a.live ? "real" : "recorded"}</span>
+              <span className="label hidden text-right text-muted sm:block">{a.live ? "real" : "recorded"}</span>
             </Link>
           ))}
         </section>

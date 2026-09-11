@@ -60,6 +60,20 @@ happens when you press the button, and hanging up ends it.
 
 More detail on all of this in [SAFETY.md](SAFETY.md).
 
+## Your own audience
+
+The three regulars are a start. The people you actually have to convince are on the page called
+Your audience: paste what one of them says about themselves, or upload a CSV with a row per
+person and get all of them on the line, up to fifty at a time. There is a sample file at
+`public/sample-audience.csv` showing the columns. Every trait we give a person is shown next to
+the words of theirs that produced it, so you can see the working and disagree with it. Nobody on
+your list is ever dialled.
+
+Before any call you can set how they come at you: the tone (warm, neutral, blunt, hostile) and
+what they walked in wanting (curious, sceptical, on the fence, looking for a reason to say no).
+Same person, different day. The caller listens to what you actually say and pushes back on it in
+their own words, not on a script.
+
 ## How the scoring actually works
 
 Two layers, and the second one is not allowed to flatter you.

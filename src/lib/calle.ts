@@ -14,7 +14,7 @@ import { readFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 import { compileTask, resultSchemaFor } from "./persona";
 import { ConfigError, maskPhone, resolveOwnerNumber } from "./mask";
-import type { DrillOutcome, PersonaSpec, TranscriptTurn } from "./types";
+import type { CallSettings, DrillOutcome, PersonaSpec, TranscriptTurn } from "./types";
 
 const FIXTURE_DIR = join(process.cwd(), "fixtures", "transcripts");
 
@@ -55,9 +55,9 @@ export interface DrillPreview {
  * Everything that would be sent, with the destination masked. Building a preview never
  * dials and never needs an API key, so this is safe to render in a UI or print in a terminal.
  */
-export function previewDrill(spec: PersonaSpec, ownerE164?: string): DrillPreview {
+export function previewDrill(spec: PersonaSpec, ownerE164?: string, settings?: CallSettings | null): DrillPreview {
   const owner = ownerE164 ?? (process.env.OWNER_E164?.trim() || "");
-  const task = owner ? compileTask(spec, owner) : compileTask(spec, "{OWNER_E164 not set}");
+  const task = owner ? compileTask(spec, owner, settings) : compileTask(spec, "{OWNER_E164 not set}", settings);
   return {
     personaId: spec.id,
     displayName: spec.display_name,
@@ -143,6 +143,8 @@ export interface RunDrillOptions {
   idempotencyKey?: string;
   timeoutMs?: number;
   pollIntervalMs?: number;
+  /** How the caller should come at the trainee on this call. */
+  settings?: CallSettings | null;
 }
 
 export function loadFixtureOutcome(spec: PersonaSpec, fixtureId?: string): DrillOutcome {
@@ -169,8 +171,11 @@ export function loadFixtureOutcome(spec: PersonaSpec, fixtureId?: string): Drill
  * exactly one call to OWNER_E164 and waits for the result.
  */
 export async function runDrill(spec: PersonaSpec, options: RunDrillOptions = {}): Promise<DrillOutcome> {
+  const settings = options.settings ?? undefined;
+
   if (!isLive()) {
-    return loadFixtureOutcome(spec, options.fixtureId);
+    const replay = loadFixtureOutcome(spec, options.fixtureId);
+    return settings ? { ...replay, settings } : replay;
   }
 
   const owner = resolveOwnerNumber();
@@ -183,7 +188,7 @@ export async function runDrill(spec: PersonaSpec, options: RunDrillOptions = {})
     );
   }
 
-  const task = compileTask(spec, owner);
+  const task = compileTask(spec, owner, settings);
 
   // The guard: the compiled task must address the owner's number and nothing else.
   if (!task.includes(owner)) {
@@ -208,6 +213,8 @@ export async function runDrill(spec: PersonaSpec, options: RunDrillOptions = {})
           app: "sparbird",
           persona_id: spec.id,
           persona_source: spec.source,
+          tone: settings?.tone ?? "default",
+          intent: settings?.intent ?? "default",
         },
       },
       {
@@ -217,7 +224,8 @@ export async function runDrill(spec: PersonaSpec, options: RunDrillOptions = {})
       },
     );
 
-    return normalise(call as unknown as Record<string, unknown>, spec.id, true);
+    const outcome = normalise(call as unknown as Record<string, unknown>, spec.id, true);
+    return settings ? { ...outcome, settings } : outcome;
   } catch (error) {
     throw new CallePlacementError(
       "CALL-E did not return a completed call. Nothing has been scored. " +

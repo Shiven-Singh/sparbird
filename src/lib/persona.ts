@@ -9,7 +9,7 @@
 import { readFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 import { z } from "zod";
-import type { PersonaSpec, RubricItem } from "./types";
+import type { CallSettings, PersonaSpec, RubricItem } from "./types";
 
 /** Said first, verbatim, on every call Sparbird places. Not configurable. */
 export const DISCLOSURE = "Heads up, this is a simulated practice persona, not a real person.";
@@ -93,9 +93,53 @@ export function loadAllPersonas(): PersonaSpec[] {
   return listPersonaIds().map(loadPersona);
 }
 
+/** How the caller comes at you. "default" means as the persona is written. */
+export const TONES: Record<string, { label: string; brief: string }> = {
+  default: { label: "As written", brief: "" },
+  warm: { label: "Warm", brief: "warm and easy to talk to, but hands you nothing you have not earned" },
+  neutral: { label: "Neutral", brief: "level and businesslike, neither friendly nor cold" },
+  blunt: { label: "Blunt", brief: "blunt; says exactly what they think with no cushioning" },
+  hostile: { label: "Hostile", brief: "short-tempered and openly doubtful of you from the first line" },
+};
+
+export const INTENTS: Record<string, { label: string; brief: string }> = {
+  default: { label: "As written", brief: "" },
+  curious: { label: "Curious", brief: "genuinely curious and open to being convinced" },
+  skeptical: { label: "Sceptical", brief: "sceptical; assumes the pitch is oversold until shown otherwise" },
+  fence: { label: "On the fence", brief: "on the fence; has a real need but is weighing an alternative" },
+  no: { label: "Wants to say no", brief: "looking for a reason to say no and end the call early" },
+};
+
+export function isToneKey(value: unknown): value is keyof typeof TONES {
+  return typeof value === "string" && value in TONES;
+}
+
+export function isIntentKey(value: unknown): value is keyof typeof INTENTS {
+  return typeof value === "string" && value in INTENTS;
+}
+
+/** The settings a call was made with, in a sentence for a human. */
+export function describeSettings(settings: CallSettings | undefined | null): string | null {
+  if (!settings) return null;
+  const parts: string[] = [];
+  if (settings.tone !== "default" && TONES[settings.tone]) parts.push(TONES[settings.tone]!.brief);
+  if (settings.intent !== "default" && INTENTS[settings.intent]) parts.push(INTENTS[settings.intent]!.brief);
+  if (parts.length === 0) return null;
+  return `They were ${parts.join(", and ")}.`;
+}
+
 /** Compiles the persona into the task text CALL-E runs. */
-export function compileTask(spec: PersonaSpec, ownerE164: string): string {
+export function compileTask(spec: PersonaSpec, ownerE164: string, settings?: CallSettings | null): string {
   const objections = [...spec.hidden_state.scripted_objections].sort((a, b) => a.after_turn - b.after_turn);
+
+  const toneLine =
+    settings && settings.tone !== "default" && TONES[settings.tone]
+      ? `Tone for this call: ${TONES[settings.tone]!.brief}.`
+      : "";
+  const intentLine =
+    settings && settings.intent !== "default" && INTENTS[settings.intent]
+      ? `Going in, you are ${INTENTS[settings.intent]!.brief}.`
+      : "";
 
   const objectionLines = objections.length
     ? objections
@@ -117,6 +161,12 @@ export function compileTask(spec: PersonaSpec, ownerE164: string): string {
     ...spec.style.map((s) => `- ${s}`),
     "",
     `Speak at a ${spec.voice.pace} pace with ${spec.voice.patience} patience.`,
+    toneLine,
+    intentLine,
+    "",
+    "Listen to what the trainee actually says and respond to it in your own words. Push back on the specific",
+    "claim they just made, not on a script. If they answer an objection well, move on to the next thing you",
+    "would really care about; if they dodge it, come back to it.",
     "",
     "Let the trainee lead. Do not coach them, do not break character to help, and do not fill their silences.",
     "",

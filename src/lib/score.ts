@@ -145,6 +145,7 @@ function unscored(spec: PersonaSpec, outcome: DrillOutcome, reason: string, judg
     weakestMoment: null,
     personaVerdict: null,
     judge,
+    settings: outcome.settings,
   };
 }
 
@@ -208,6 +209,7 @@ export async function scoreDrill(
     personaVerdict: disputed ? null : ((result.persona_verdict as string) ?? null),
     judge: judge.name,
     review,
+    settings: outcome.settings,
   };
 }
 

@@ -1,9 +1,10 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { Avatar } from "@/components/avatar";
 import { TakeCall } from "@/components/take-call";
-import { Tile } from "@/components/tile";
 import { isLive, previewDrill } from "@/lib/calle";
-import { listPersonaIds, loadPersona } from "@/lib/persona";
+import { INTENTS, TONES, isIntentKey, isToneKey, listPersonaIds, loadPersona } from "@/lib/persona";
+import type { CallSettings } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
 
@@ -11,37 +12,61 @@ function cap(s: string): string {
   return s.charAt(0).toUpperCase() + s.slice(1);
 }
 
-export default async function DrillPage({ params }: { params: Promise<{ id: string }> }) {
+export default async function DrillPage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ id: string }>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
   const { id } = await params;
   if (!listPersonaIds().includes(id)) notFound();
 
+  const query = await searchParams;
+  const tone = isToneKey(query.tone) ? query.tone : "default";
+  const intent = isIntentKey(query.intent) ? query.intent : "default";
+  const settings: CallSettings | null = tone === "default" && intent === "default" ? null : { tone, intent };
+
   const persona = loadPersona(id);
-  const preview = previewDrill(persona);
+  const preview = previewDrill(persona, undefined, settings);
   const live = isLive();
   const provenance = persona.provenance ?? [];
 
+  const href = (next: Partial<CallSettings>) => {
+    const t = next.tone ?? tone;
+    const i = next.intent ?? intent;
+    const q = new URLSearchParams();
+    if (t !== "default") q.set("tone", t);
+    if (i !== "default") q.set("intent", i);
+    const s = q.toString();
+    return `/drill/${persona.id}${s ? `?${s}` : ""}`;
+  };
+
   return (
-    <div className="px-8 py-10 md:px-12">
+    <div className="px-5 py-6 md:px-12 md:py-10">
       <Link href="/" className="pill appear appear--scale d-1">
         ← All callers
       </Link>
 
-      <header className="appear appear--soft d-2 mt-6 flex flex-wrap items-start justify-between gap-8">
-        <div className="flex max-w-2xl gap-5">
-          <Tile name={persona.display_name} mark={persona.source === "profile"} className="!size-14 !text-lg" />
-          <div>
-            <h1 className="h1 text-[32px] text-text">{persona.display_name}</h1>
+      <header className="appear appear--soft d-2 mt-6 flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between lg:gap-8">
+        <div className="flex max-w-2xl gap-4 sm:gap-5">
+          <span className="grid size-16 shrink-0 place-items-center rounded-lg border border-border-soft bg-panel sm:size-20">
+            <Avatar seed={persona.id} className="size-14 sm:size-[72px]" />
+          </span>
+          <div className="min-w-0">
+            {persona.source === "profile" ? <span className="label mb-2 inline-block rounded-sm border border-border px-1.5 py-1 text-text">Yours</span> : null}
+            <h1 className="h1 text-[26px] text-text md:text-[32px]">{persona.display_name}</h1>
             <p className="mt-2 text-[15px] leading-relaxed text-text-2">{persona.summary}</p>
             <p className="mt-2 text-[13px] leading-relaxed text-muted">
-              Warms up only if {persona.reads?.engages_if ?? persona.hidden_state.engages_only_if}.
-              Agrees to a next step only if{" "}
-              {persona.reads?.agrees_if ?? persona.hidden_state.concession}. Expect to be pushed at
-              least {persona.hidden_state.scripted_objections.length} times, and you will not know when.
+              They listen to what you say and come back at it in their own words. Warms up only if{" "}
+              {persona.reads?.engages_if ?? persona.hidden_state.engages_only_if}. Agrees to a next step
+              only if {persona.reads?.agrees_if ?? persona.hidden_state.concession}. Expect to be pushed
+              at least {persona.hidden_state.scripted_objections.length} times, and you will not know when.
             </p>
           </div>
         </div>
-        <div className="flex flex-col items-start gap-2">
-          <TakeCall personaId={persona.id} live={live} destinationMasked={preview.destinationMasked} />
+        <div className="flex w-full flex-col items-start gap-2 lg:w-auto">
+          <TakeCall personaId={persona.id} live={live} destinationMasked={preview.destinationMasked} tone={tone} intent={intent} />
           <p className="max-w-xs text-[12px] leading-relaxed text-muted">
             {live
               ? `Rings ${preview.destinationMasked}, your own number and nobody else's.`
@@ -50,12 +75,41 @@ export default async function DrillPage({ params }: { params: Promise<{ id: stri
         </div>
       </header>
 
+      <section className="panel appear appear--soft d-3 mt-8 rounded-lg p-5">
+        <p className="text-[14px] font-medium tracking-[-0.02em] text-text">How should they come at you?</p>
+        <p className="mt-1 text-[13px] text-muted">
+          Same person, different day. Pick the mood and what they walked in wanting; the call changes with it.
+        </p>
+        <div className="mt-4 grid gap-4 md:grid-cols-2">
+          <div>
+            <p className="label text-muted">Tone</p>
+            <div className="mt-2 flex flex-wrap gap-2">
+              {Object.entries(TONES).map(([key, t]) => (
+                <Link key={key} href={href({ tone: key })} className={`pill ${tone === key ? "pill-on" : ""}`} scroll={false}>
+                  {t.label}
+                </Link>
+              ))}
+            </div>
+          </div>
+          <div>
+            <p className="label text-muted">What they want</p>
+            <div className="mt-2 flex flex-wrap gap-2">
+              {Object.entries(INTENTS).map(([key, i]) => (
+                <Link key={key} href={href({ intent: key })} className={`pill ${intent === key ? "pill-on" : ""}`} scroll={false}>
+                  {i.label}
+                </Link>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
       {provenance.length > 0 ? (
-        <section className="panel appear appear--soft d-3 mt-8 rounded-lg">
-          <div className="border-b border-border-soft px-6 py-3">
+        <section className="panel appear appear--soft d-4 mt-6 rounded-lg">
+          <div className="border-b border-border-soft px-5 py-3 md:px-6">
             <p className="label text-muted">How we read them</p>
           </div>
-          <div className="label grid grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)_minmax(0,1.2fr)] gap-6 border-b border-border-soft px-6 py-2.5 text-muted">
+          <div className="label hidden grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)_minmax(0,1.2fr)] gap-6 border-b border-border-soft px-6 py-2.5 text-muted md:grid">
             <span>They wrote</span>
             <span>So expect someone who</span>
             <span>Which sounds like</span>
@@ -63,20 +117,29 @@ export default async function DrillPage({ params }: { params: Promise<{ id: stri
           {provenance.map((p) => (
             <div
               key={p.trait}
-              className="grid grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)_minmax(0,1.2fr)] gap-6 border-b border-border-soft px-6 py-3.5 text-[14px] leading-relaxed last:border-b-0"
+              className="grid gap-3 border-b border-border-soft px-5 py-4 text-[14px] leading-relaxed last:border-b-0 md:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)_minmax(0,1.2fr)] md:gap-6 md:px-6 md:py-3.5"
             >
-              <p className="serif text-[17px] text-text">“{p.because}”</p>
-              <p className="text-text-2">{p.trait}</p>
-              <p className="serif text-[17px] text-muted">“{p.objection}”</p>
+              <div>
+                <span className="label mb-1 block text-muted md:hidden">They wrote</span>
+                <p className="serif text-[17px] text-text">“{p.because}”</p>
+              </div>
+              <div>
+                <span className="label mb-1 block text-muted md:hidden">So expect someone who</span>
+                <p className="text-text-2">{p.trait}</p>
+              </div>
+              <div>
+                <span className="label mb-1 block text-muted md:hidden">Which sounds like</span>
+                <p className="serif text-[17px] text-muted">“{p.objection}”</p>
+              </div>
             </div>
           ))}
         </section>
       ) : null}
 
-      <section className="appear appear--soft d-4 mt-6 grid gap-6 md:grid-cols-2">
+      <section className="appear appear--soft d-5 mt-6 grid gap-6 md:grid-cols-2">
         <div className="panel rounded-lg">
-          <p className="label border-b border-border-soft px-6 py-3 text-muted">What they will do to you</p>
-          <ul className="divide-y divide-border-soft px-6">
+          <p className="label border-b border-border-soft px-5 py-3 text-muted md:px-6">What they will do to you</p>
+          <ul className="divide-y divide-border-soft px-5 md:px-6">
             {persona.style.map((trait) => (
               <li key={trait} className="py-3 text-[14px] leading-relaxed text-text-2">
                 {cap(trait)}.
@@ -85,8 +148,8 @@ export default async function DrillPage({ params }: { params: Promise<{ id: stri
           </ul>
         </div>
         <div className="panel rounded-lg">
-          <p className="label border-b border-border-soft px-6 py-3 text-muted">What they need to hear</p>
-          <ol className="divide-y divide-border-soft px-6">
+          <p className="label border-b border-border-soft px-5 py-3 text-muted md:px-6">What they need to hear</p>
+          <ol className="divide-y divide-border-soft px-5 md:px-6">
             {persona.rubric.map((item, index) => (
               <li key={item.id} className="flex items-baseline gap-4 py-3">
                 <span className="tnum w-4 text-[12px] font-medium text-muted">{index + 1}</span>
@@ -95,18 +158,18 @@ export default async function DrillPage({ params }: { params: Promise<{ id: stri
               </li>
             ))}
           </ol>
-          <p className="border-t border-border-soft px-6 py-3 text-[12px] leading-relaxed text-muted">
+          <p className="border-t border-border-soft px-5 py-3 text-[12px] leading-relaxed text-muted md:px-6">
             Each one is marked after the call only if a line of the recording proves it.
           </p>
         </div>
       </section>
 
-      <details className="group appear appear--soft d-5 mt-6">
+      <details className="group appear appear--soft d-6 mt-6">
         <summary className="label flex cursor-pointer list-none items-center gap-2 py-2 text-muted transition-colors hover:text-text">
           <span className="inline-block transition-transform group-open:rotate-90" aria-hidden>›</span>
           Read exactly what they will be told
         </summary>
-        <pre className="panel mt-3 max-w-3xl rounded-lg px-6 py-5 font-sans text-[13px] leading-relaxed whitespace-pre-wrap text-muted">
+        <pre className="panel mt-3 max-w-3xl rounded-lg px-5 py-5 font-sans text-[13px] leading-relaxed whitespace-pre-wrap text-muted md:px-6">
           {preview.task}
         </pre>
       </details>

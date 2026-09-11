@@ -7,9 +7,11 @@ interface Props {
   personaId: string;
   live: boolean;
   destinationMasked: string;
+  tone?: string;
+  intent?: string;
 }
 
-export function TakeCall({ personaId, live, destinationMasked }: Props) {
+export function TakeCall({ personaId, live, destinationMasked, tone, intent }: Props) {
   const router = useRouter();
   const [armed, setArmed] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -22,7 +24,7 @@ export function TakeCall({ personaId, live, destinationMasked }: Props) {
       const response = await fetch("/api/drill", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ personaId }),
+        body: JSON.stringify({ personaId, tone, intent }),
       });
       const data = await response.json();
       if (!response.ok) throw new Error(data.error ?? "Something went wrong.");
@@ -69,8 +71,12 @@ export function TakeCall({ personaId, live, destinationMasked }: Props) {
   }
 
   return (
-    <div>
-      <button type="button" onClick={() => (live ? setArmed(true) : run())} className="btn btn-solid h-[42px] px-[18px]">
+    <div className="w-full sm:w-auto">
+      <button
+        type="button"
+        onClick={() => (live ? setArmed(true) : run())}
+        className="btn btn-solid h-[44px] w-full px-[18px] sm:w-auto"
+      >
         {live ? "Call me now" : "Play a call that already happened"}
       </button>
       {error ? <p className="mt-3 text-[13px] text-text-2">{error}</p> : null}

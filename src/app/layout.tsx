@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Instrument_Serif, Inter } from "next/font/google";
 import Link from "next/link";
 import { Wordmark } from "@/components/logo";
@@ -25,6 +25,12 @@ const instrument = Instrument_Serif({
 export const metadata: Metadata = {
   title: "Sparbird",
   description: "Walk in having already had the conversation.",
+};
+
+export const viewport: Viewport = {
+  themeColor: "#000000",
+  width: "device-width",
+  initialScale: 1,
 };
 
 function ago(iso: string): string {
@@ -57,76 +63,97 @@ export default async function RootLayout({ children }: { children: React.ReactNo
     <html lang="en" className={`${inter.variable} ${instrument.variable}`}>
       <body style={{ background: "#000", color: "#fff" }} className="min-h-screen">
         <div className="grain" aria-hidden />
-        <div className="grid min-h-screen md:grid-cols-[256px_minmax(0,1fr)]">
-          <aside className="flex flex-col border-b border-border-soft md:sticky md:top-0 md:h-screen md:border-r md:border-b-0">
-            <div className="appear appear--scale d-1 px-5 pt-6 pb-5">
-              <Link href="/" className="inline-block">
-                <Wordmark />
+        <div className="md:grid md:min-h-screen md:grid-cols-[256px_minmax(0,1fr)]">
+          <aside className="border-b border-border-soft md:sticky md:top-0 md:flex md:h-screen md:flex-col md:border-r md:border-b-0">
+            {/* phone: one bar */}
+            <div className="flex items-center justify-between gap-3 px-4 py-3 md:hidden">
+              <Link href="/" className="inline-block" aria-label="Sparbird">
+                <Mark className="size-7" />
               </Link>
-            </div>
-
-            <nav className="flex flex-col gap-2 px-5">
-              <Link href="/" className="btn btn-solid appear appear--soft d-2 justify-between">
-                New rehearsal <span aria-hidden>→</span>
-              </Link>
-              <Link href="/from-profile" className="btn btn-ghost appear appear--soft d-3 justify-between">
-                From a profile <span aria-hidden>→</span>
-              </Link>
-            </nav>
-
-            <div className="appear appear--soft d-4 mt-8 flex min-h-0 flex-1 flex-col px-5">
-              <div className="flex items-baseline justify-between">
-                <p className="label text-muted">Past calls</p>
-                <Link href="/calls" className="label text-muted transition-colors hover:text-text">
-                  All
+              <div className="flex items-center gap-2">
+                <Link href="/from-profile" className="pill h-9 px-3">
+                  Audience
+                </Link>
+                <Link href="/calls" className="pill h-9 px-3">
+                  Calls
+                </Link>
+                <Link href="/" className="btn btn-solid h-9 px-3">
+                  New
                 </Link>
               </div>
-              {recent.length === 0 ? (
-                <p className="mt-3 text-[13px] leading-relaxed text-muted">Your first rehearsal shows up here.</p>
-              ) : (
-                <ul className="mt-2 -mx-2 overflow-y-auto">
-                  {recent.map((a) => (
-                    <li key={a.id}>
-                      <Link
-                        href={`/attempt/${encodeURIComponent(a.id)}`}
-                        className="flex items-start gap-2.5 rounded-md px-2 py-2 transition-colors hover:bg-panel-2"
-                      >
-                        <span
-                          aria-hidden
-                          className={`mt-1.5 size-2 shrink-0 rounded-full ${
-                            a.disposition === "unscored"
-                              ? "ring-1 ring-muted"
-                              : a.itemsWithEvidence === a.itemsTotal
-                                ? "bg-text"
-                                : a.itemsWithEvidence === 0
-                                  ? "ring-1 ring-text"
-                                  : "bg-muted"
-                          }`}
-                        />
-                        <span className="min-w-0 flex-1">
-                          <span className="block truncate text-[13px] font-medium text-text">
-                            {names.get(a.personaId) ?? a.personaId}
-                          </span>
-                          <span className="tnum block text-[12px] text-muted">
-                            {a.disposition === "unscored"
-                              ? "not graded"
-                              : `${a.itemsWithEvidence} of ${a.itemsTotal} landed`}
-                            {a.disputed ? " · disputed" : ""}
-                          </span>
-                        </span>
-                        <span className="tnum text-[12px] text-faint">{ago(a.createdAt)}</span>
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
-              )}
             </div>
 
-            <div className="border-t border-border-soft px-5 py-4">
-              <p className="flex items-center gap-2 text-[12px] text-muted">
-                <span aria-hidden className={`size-2 rounded-full ${live ? "bg-text" : "ring-1 ring-muted"}`} />
-                {live ? "Your phone can ring" : "Nothing will ring"}
-              </p>
+            {/* desktop: the rail */}
+            <div className="hidden min-h-0 flex-1 flex-col md:flex">
+              <div className="appear appear--scale d-1 px-5 pt-6 pb-5">
+                <Link href="/" className="inline-block">
+                  <Wordmark />
+                </Link>
+              </div>
+
+              <nav className="flex flex-col gap-2 px-5">
+                <Link href="/" className="btn btn-solid appear appear--soft d-2 justify-between">
+                  New rehearsal <span aria-hidden>→</span>
+                </Link>
+                <Link href="/from-profile" className="btn btn-ghost appear appear--soft d-3 justify-between">
+                  Your audience <span aria-hidden>→</span>
+                </Link>
+              </nav>
+
+              <div className="appear appear--soft d-4 mt-8 flex min-h-0 flex-1 flex-col px-5">
+                <div className="flex items-baseline justify-between">
+                  <p className="label text-muted">Past calls</p>
+                  <Link href="/calls" className="label text-muted transition-colors hover:text-text">
+                    All
+                  </Link>
+                </div>
+                {recent.length === 0 ? (
+                  <p className="mt-3 text-[13px] leading-relaxed text-muted">Your first rehearsal shows up here.</p>
+                ) : (
+                  <ul className="mt-2 -mx-2 overflow-y-auto">
+                    {recent.map((a) => (
+                      <li key={a.id}>
+                        <Link
+                          href={`/attempt/${encodeURIComponent(a.id)}`}
+                          className="flex items-start gap-2.5 rounded-md px-2 py-2 transition-colors hover:bg-panel-2"
+                        >
+                          <span
+                            aria-hidden
+                            className={`mt-1.5 size-2 shrink-0 rounded-full ${
+                              a.disposition === "unscored"
+                                ? "ring-1 ring-muted"
+                                : a.itemsWithEvidence === a.itemsTotal
+                                  ? "bg-text"
+                                  : a.itemsWithEvidence === 0
+                                    ? "ring-1 ring-text"
+                                    : "bg-muted"
+                            }`}
+                          />
+                          <span className="min-w-0 flex-1">
+                            <span className="block truncate text-[13px] font-medium text-text">
+                              {names.get(a.personaId) ?? a.personaId}
+                            </span>
+                            <span className="tnum block text-[12px] text-muted">
+                              {a.disposition === "unscored"
+                                ? "not graded"
+                                : `${a.itemsWithEvidence} of ${a.itemsTotal} landed`}
+                              {a.disputed ? " · disputed" : ""}
+                            </span>
+                          </span>
+                          <span className="tnum text-[12px] text-faint">{ago(a.createdAt)}</span>
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+
+              <div className="border-t border-border-soft px-5 py-4">
+                <p className="flex items-center gap-2 text-[12px] text-muted">
+                  <span aria-hidden className={`size-2 rounded-full ${live ? "bg-text" : "ring-1 ring-muted"}`} />
+                  {live ? "Your phone can ring" : "Nothing will ring"}
+                </p>
+              </div>
             </div>
           </aside>
 

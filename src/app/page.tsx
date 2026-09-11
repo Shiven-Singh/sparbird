@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Tile } from "@/components/tile";
+import { PersonaCard } from "@/components/persona-card";
 import { loadAllPersonas } from "@/lib/persona";
 
 export const dynamic = "force-dynamic";
@@ -12,78 +12,93 @@ function Star() {
   );
 }
 
+const PROMISES: Array<[string, string, string]> = [
+  [
+    "They listen, then come back at you",
+    "The person on the line follows what you actually said and pushes back on it in their own words. Not a script, not a quiz.",
+    "M4 5h16v10H9l-5 4V5Zm3 3v2h10V8H7Zm0 4v2h6v-2H7Z",
+  ],
+  [
+    "A real line, a real scenario",
+    "Your own phone, five minutes, the pressure of a live conversation. The way it will feel on the day, before the day.",
+    "M12 3a7 7 0 0 1 7 7v1h-2v-1a5 5 0 0 0-10 0v1H5v-1a7 7 0 0 1 7-7Zm-6 9h12a1 1 0 0 1 1 1v6a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-6a1 1 0 0 1 1-1Z",
+  ],
+  [
+    "Clarity on the pitch itself",
+    "Every line that landed or lost them is quoted back with the time it happened, so you fix the words, not the feeling.",
+    "M5 4h14v2H5V4Zm0 5h14v2H5V9Zm0 5h9v2H5v-2Zm0 5h6v2H5v-2Z",
+  ],
+];
+
 export default function Home() {
   const personas = loadAllPersonas();
-  const ordered = [
-    ...personas.filter((p) => p.source === "profile"),
-    ...personas.filter((p) => p.source === "archetype"),
-  ];
+  const yours = personas.filter((p) => p.source === "profile");
+  const stock = personas.filter((p) => p.source === "archetype");
 
   return (
-    <div className="px-8 py-10 md:px-12">
+    <div className="px-5 py-6 md:px-12 md:py-10">
       <header className="max-w-3xl">
         <span className="badge appear appear--pop d-2">
           <Star />
           Rehearse the call before it counts
         </span>
-        <h1 className="h1 appear appear--soft d-3 mt-5 text-[40px] text-balance text-text md:text-[48px]">
+        <h1 className="h1 appear appear--soft d-3 mt-5 text-[32px] text-balance text-text md:text-[48px]">
           Walk in having already had the <em>conversation</em>.
         </h1>
-        <p className="appear appear--soft d-4 mt-4 max-w-[520px] text-[15.5px] leading-[1.55] tracking-[-0.015em] text-muted">
-          Pick the person you are about to face. Your phone rings, they push back the way they will
-          on the day, and you see where you lost them, quoted line by line.
+        <p className="appear appear--soft d-4 mt-4 max-w-[540px] text-[15.5px] leading-[1.55] tracking-[-0.015em] text-muted">
+          Pick the person you are about to face. They listen to your pitch, push back on it in real
+          time, and decide. You walk out knowing exactly where it was unclear.
         </p>
       </header>
 
-      <section className="panel appear appear--soft d-5 mt-10 rounded-lg">
-        <div className="label grid grid-cols-[minmax(0,1.15fr)_minmax(0,1.6fr)_72px_136px] gap-6 border-b border-border-soft px-6 py-3 text-muted">
-          <span>Who</span>
-          <span>What they push on</span>
-          <span className="text-right">Length</span>
-          <span />
-        </div>
-
-        {ordered.map((persona) => (
-          <Link
-            key={persona.id}
-            href={`/drill/${persona.id}`}
-            className="group grid grid-cols-[minmax(0,1.15fr)_minmax(0,1.6fr)_72px_136px] items-start gap-6 border-b border-border-soft px-6 py-5 transition-colors last:border-b-0 hover:bg-panel-2"
-          >
-            <div className="flex min-w-0 gap-4">
-              <Tile name={persona.display_name} mark={persona.source === "profile"} />
-              <div className="min-w-0">
-                <h2 className="text-[17px] font-medium tracking-[-0.03em] text-text">{persona.display_name}</h2>
-                <p className="mt-1 text-[13px] text-muted">
-                  {persona.source === "profile" ? "read from a profile" : persona.audience}
-                </p>
-              </div>
+      <section className="appear appear--soft d-5 mt-8 grid gap-3 md:grid-cols-3">
+        {PROMISES.map(([title, body, d]) => (
+          <div key={title} className="panel flex gap-4 rounded-lg p-5">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="#e8e8e8" aria-hidden className="mt-0.5 shrink-0">
+              <path d={d} />
+            </svg>
+            <div>
+              <p className="text-[14px] font-medium tracking-[-0.02em] text-text">{title}</p>
+              <p className="mt-1 text-[13px] leading-relaxed text-muted">{body}</p>
             </div>
-            <div className="min-w-0 pt-0.5">
-              <p className="text-[14px] leading-relaxed text-text-2">{persona.summary}</p>
-              <p className="mt-1.5 text-[13px] leading-relaxed text-muted">
-                Warms up only if {persona.reads?.engages_if ?? persona.hidden_state.engages_only_if}.
-              </p>
-            </div>
-            <span className="tnum pt-1 text-right text-[14px] text-text-2">{persona.max_minutes} min</span>
-            <span className="btn btn-solid">Take this call</span>
-          </Link>
+          </div>
         ))}
       </section>
 
-      <footer className="mt-10 flex flex-wrap items-center gap-x-10 gap-y-4 text-[13.5px] tracking-[-0.015em] text-text-2">
-        {[
-          ["It only ever rings you", "M12 3a7 7 0 0 1 7 7v1h-2v-1a5 5 0 0 0-10 0v1H5v-1a7 7 0 0 1 7-7Zm-6 9h12a1 1 0 0 1 1 1v6a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-6a1 1 0 0 1 1-1Z"],
-          ["Every point is quoted from the call", "M5 4h14v2H5V4Zm0 5h14v2H5V9Zm0 5h9v2H5v-2Zm0 5h6v2H5v-2Z"],
-          ["Every promise you make is flagged", "M6 3h2v18H6V3Zm3 1h9l-2 4 2 4H9V4Z"],
-        ].map(([text, d], i) => (
-          <span key={text} className={`appear appear--stat d-${6 + i} inline-flex items-center gap-3`}>
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="#e8e8e8" aria-hidden>
-              <path d={d} />
-            </svg>
-            {text}
-          </span>
-        ))}
-      </footer>
+      <section className="appear appear--soft d-6 mt-10">
+        <div className="flex flex-wrap items-end justify-between gap-4">
+          <div>
+            <h2 className="text-[20px] font-medium tracking-[-0.03em] text-text">Who is calling you?</h2>
+            <p className="mt-1 text-[14px] text-muted">Each one is hard in a different way, and each one is winnable.</p>
+          </div>
+          <Link href="/from-profile" className="btn btn-ghost">
+            Add your own audience
+          </Link>
+        </div>
+
+        {yours.length > 0 ? (
+          <>
+            <p className="label mt-6 text-muted">Your audience</p>
+            <div className="mt-3 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+              {yours.map((p) => (
+                <PersonaCard key={p.id} persona={p} />
+              ))}
+            </div>
+            <p className="label mt-8 text-muted">The regulars</p>
+          </>
+        ) : null}
+
+        <div className="mt-3 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+          {stock.map((p) => (
+            <PersonaCard key={p.id} persona={p} />
+          ))}
+        </div>
+      </section>
+
+      <p className="appear appear--soft d-7 mt-8 max-w-xl text-[13px] leading-relaxed text-faint">
+        It only ever calls you. There is no contact list and no way to point it at somebody else,
+        and every call opens by saying out loud that it is a rehearsal.
+      </p>
     </div>
   );
 }
