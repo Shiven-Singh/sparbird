@@ -71,9 +71,12 @@ export default function Home() {
             <h2 className="text-[20px] font-medium tracking-[-0.03em] text-text">Who is calling you?</h2>
             <p className="mt-1 text-[14px] text-muted">Each one is hard in a different way, and each one is winnable.</p>
           </div>
-          <Link href="/from-profile" className="btn btn-ghost">
-            Add your own audience
-          </Link>
+          <div className="flex flex-wrap items-center gap-3">
+            <span className="label text-faint">Coming soon: paste a LinkedIn link</span>
+            <Link href="/from-profile" className="btn btn-ghost">
+              Add your own audience
+            </Link>
+          </div>
         </div>
 
         {yours.length > 0 ? (

@@ -36,6 +36,23 @@ export default function FromProfilePage() {
             <ProfileForm sample={sample} />
           </div>
 
+          <div className="panel relative rounded-lg px-5 py-5 md:px-6 md:py-6">
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <p className="text-[14px] font-medium tracking-[-0.02em] text-text">From a LinkedIn link</p>
+                <p className="mt-1 text-[13px] text-muted">
+                  One link, and we read the profile for you: headline, about, recent posts, then build
+                  the person. Until then, paste the text above.
+                </p>
+              </div>
+              <span className="label shrink-0 rounded-sm border border-border px-1.5 py-1 text-text">Coming soon</span>
+            </div>
+            <div className="mt-4 flex gap-2">
+              <input className="field" placeholder="https://www.linkedin.com/in/…" disabled aria-disabled />
+              <span className="btn btn-ghost shrink-0 opacity-45">Read them</span>
+            </div>
+          </div>
+
           <div className="panel rounded-lg px-5 py-5 md:px-6 md:py-6">
             <p className="text-[14px] font-medium tracking-[-0.02em] text-text">Many at once</p>
             <p className="mt-1 mb-5 text-[13px] text-muted">
