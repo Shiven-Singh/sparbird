@@ -1,7 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Instrument_Serif, Inter } from "next/font/google";
 import Link from "next/link";
-import { Wordmark } from "@/components/logo";
+import { Mark, Wordmark } from "@/components/logo";
 import { isLive } from "@/lib/calle";
 import { getStore } from "@/lib/db";
 import { loadPersona } from "@/lib/persona";
