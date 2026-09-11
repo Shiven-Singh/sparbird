@@ -28,6 +28,9 @@ export interface AttemptRecord {
   transcript: DrillOutcome["transcript"];
   /** The account that took the call. Null for the seeded samples and for guests. */
   userId: string | null;
+  /** How to find this call in the CALL-E dashboard, and audio if there ever is any. */
+  providerCallId: string | null;
+  recordingUrl: string | null;
 }
 
 export interface UserRecord {
@@ -107,6 +110,8 @@ interface SqliteRow {
   card_json: string;
   transcript_json: string;
   user_id: string | null;
+  provider_call_id: string | null;
+  recording_url: string | null;
 }
 
 interface UserRow {
@@ -135,6 +140,8 @@ function toRecord(row: SqliteRow): AttemptRecord {
     card: JSON.parse(row.card_json) as Scorecard,
     transcript: JSON.parse(row.transcript_json) as DrillOutcome["transcript"],
     userId: row.user_id ?? null,
+    providerCallId: row.provider_call_id ?? null,
+    recordingUrl: row.recording_url ?? null,
   };
 }
 
@@ -179,7 +186,9 @@ class SqliteStore implements Store {
         created_at TEXT NOT NULL,
         card_json TEXT NOT NULL,
         transcript_json TEXT NOT NULL,
-        user_id TEXT
+        user_id TEXT,
+        provider_call_id TEXT,
+        recording_url TEXT
       );
       CREATE INDEX IF NOT EXISTS attempts_persona ON attempts (persona_id, created_at DESC);
       CREATE TABLE IF NOT EXISTS users (
@@ -191,11 +200,13 @@ class SqliteStore implements Store {
         created_at TEXT NOT NULL
       );
     `);
-    // A database created before accounts existed has no user_id column.
-    try {
-      this.db.exec("ALTER TABLE attempts ADD COLUMN user_id TEXT");
-    } catch {
-      // Already there.
+    // A database made by an older version is missing the newer columns.
+    for (const column of ["user_id TEXT", "provider_call_id TEXT", "recording_url TEXT"]) {
+      try {
+        this.db.exec(`ALTER TABLE attempts ADD COLUMN ${column}`);
+      } catch {
+        // Already there.
+      }
     }
   }
 
@@ -205,8 +216,8 @@ class SqliteStore implements Store {
         `INSERT OR REPLACE INTO attempts
          (id, persona_id, call_id, live, disposition, disputed, points, max_points,
           items_with_evidence, items_total, seconds_to_first_number, created_at,
-          card_json, transcript_json, user_id)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+          card_json, transcript_json, user_id, provider_call_id, recording_url)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       )
       .run(
         record.id,
@@ -224,6 +235,8 @@ class SqliteStore implements Store {
         JSON.stringify(record.card),
         JSON.stringify(record.transcript),
         record.userId,
+        record.providerCallId,
+        record.recordingUrl,
       );
   }
 
@@ -317,5 +330,7 @@ export function toAttemptRecord(outcome: DrillOutcome, card: Scorecard, userId: 
       text: redactNumbers(turn.text),
     })),
     userId,
+    providerCallId: outcome.providerCallId ?? null,
+    recordingUrl: outcome.recordingUrl ?? null,
   };
 }

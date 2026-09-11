@@ -9,7 +9,7 @@
  * the call, checked against the transcript, and dropped when the two disagree.
  */
 
-import { containsNumber, objectionTurns, type RubricJudge } from "./judge";
+import { AGREEMENT, REFUSAL, containsNumber, objectionTurns, type RubricJudge } from "./judge";
 import { maxPoints } from "./persona";
 import type {
   Contradiction,
@@ -22,11 +22,6 @@ import type {
 } from "./types";
 
 const INTERROGATIVE = /^(what|why|how|when|where|who|which|do|does|did|can|could|would|will|are|is|have|has)\b/i;
-
-const REFUSAL = /\b(not going to|won't take|will not take|we are done|we're done|good luck|come back when|i'll pass|i will pass|not interested)\b/i;
-
-const AGREEMENT =
-  /\b(send me|send it|i will take|i'll take|second call|next week|book|schedule|set something up|follow up|follow-up|come by|come round|see you|that works|works for (?:me|us)|let's do|sounds good|(?:monday|tuesday|wednesday|thursday|friday|saturday|sunday)[^.?!]{0,24}(?:works|at \\d|at (?:six|seven|eight|nine|ten|eleven|twelve)))\b/i;
 
 /** A turn lasts until the next one starts. The last turn gets a nominal four seconds. */
 function turnDurations(transcript: TranscriptTurn[]): number[] {

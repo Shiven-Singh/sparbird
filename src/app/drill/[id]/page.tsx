@@ -53,11 +53,11 @@ export default async function DrillPage({
 
       <header className="appear appear--soft d-2 mt-6 flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between lg:gap-8">
         <div className="flex max-w-2xl gap-4 sm:gap-5">
-          <span className="grid size-16 shrink-0 place-items-center rounded-lg border border-border-soft bg-panel sm:size-20">
+          <span className="grid size-16 shrink-0 place-items-center bg-panel sm:size-20">
             <Avatar seed={persona.id} className="size-14 sm:size-[72px]" />
           </span>
           <div className="min-w-0">
-            {persona.source === "profile" ? <span className="label mb-2 inline-block rounded-sm border border-border px-1.5 py-1 text-text">Yours</span> : null}
+            {persona.source === "profile" ? <span className="label mb-2 inline-block px-1.5 py-1 text-text">Yours</span> : null}
             <h1 className="h1 text-[26px] text-text md:text-[32px]">{persona.display_name}</h1>
             <p className="mt-2 text-[15px] leading-relaxed text-text-2">{persona.summary}</p>
             <p className="mt-2 text-[13px] leading-relaxed text-muted">
@@ -78,7 +78,7 @@ export default async function DrillPage({
         </div>
       </header>
 
-      <section className="panel appear appear--soft d-3 mt-8 rounded-lg p-5">
+      <section className="panel appear appear--soft d-3 mt-8 p-5">
         <p className="text-[14px] font-medium tracking-[-0.02em] text-text">How should they come at you?</p>
         <p className="mt-1 text-[13px] text-muted">
           Same person, different day. Pick the mood and what they walked in wanting; the call changes with it.
@@ -108,11 +108,11 @@ export default async function DrillPage({
       </section>
 
       {provenance.length > 0 ? (
-        <section className="panel appear appear--soft d-4 mt-6 rounded-lg">
-          <div className="border-b border-border-soft px-5 py-3 md:px-6">
+        <section className="panel appear appear--soft d-4 mt-6">
+          <div className="panel-head px-5 py-3 md:px-6">
             <p className="label text-muted">How we read them</p>
           </div>
-          <div className="label hidden grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)_minmax(0,1.2fr)] gap-6 border-b border-border-soft px-6 py-2.5 text-muted md:grid">
+          <div className="label panel-head hidden grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)_minmax(0,1.2fr)] gap-6 px-6 py-2.5 text-muted md:grid">
             <span>They wrote</span>
             <span>So expect someone who</span>
             <span>Which sounds like</span>
@@ -120,7 +120,7 @@ export default async function DrillPage({
           {provenance.map((p) => (
             <div
               key={p.trait}
-              className="grid gap-3 border-b border-border-soft px-5 py-4 text-[14px] leading-relaxed last:border-b-0 md:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)_minmax(0,1.2fr)] md:gap-6 md:px-6 md:py-3.5"
+              className="grid gap-3 px-5 py-4 text-[14px] leading-relaxed md:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)_minmax(0,1.2fr)] md:gap-6 md:px-6 md:py-3.5"
             >
               <div>
                 <span className="label mb-1 block text-muted md:hidden">They wrote</span>
@@ -140,9 +140,9 @@ export default async function DrillPage({
       ) : null}
 
       <section className="appear appear--soft d-5 mt-6 grid gap-6 md:grid-cols-2">
-        <div className="panel rounded-lg">
-          <p className="label border-b border-border-soft px-5 py-3 text-muted md:px-6">What they will do to you</p>
-          <ul className="divide-y divide-border-soft px-5 md:px-6">
+        <div className="panel">
+          <p className="label panel-head px-5 py-3 text-muted md:px-6">What they will do to you</p>
+          <ul className="px-5 md:px-6">
             {persona.style.map((trait) => (
               <li key={trait} className="py-3 text-[14px] leading-relaxed text-text-2">
                 {cap(trait)}.
@@ -150,9 +150,9 @@ export default async function DrillPage({
             ))}
           </ul>
         </div>
-        <div className="panel rounded-lg">
-          <p className="label border-b border-border-soft px-5 py-3 text-muted md:px-6">What they need to hear</p>
-          <ol className="divide-y divide-border-soft px-5 md:px-6">
+        <div className="panel">
+          <p className="label panel-head px-5 py-3 text-muted md:px-6">What they need to hear</p>
+          <ol className="px-5 md:px-6">
             {persona.rubric.map((item, index) => (
               <li key={item.id} className="flex items-baseline gap-4 py-3">
                 <span className="tnum w-4 text-[12px] font-medium text-muted">{index + 1}</span>
@@ -161,7 +161,7 @@ export default async function DrillPage({
               </li>
             ))}
           </ol>
-          <p className="border-t border-border-soft px-5 py-3 text-[12px] leading-relaxed text-muted md:px-6">
+          <p className="px-5 py-3 text-[12px] leading-relaxed text-muted md:px-6">
             Each one is marked after the call only if a line of the recording proves it.
           </p>
         </div>
@@ -172,7 +172,7 @@ export default async function DrillPage({
           <span className="inline-block transition-transform group-open:rotate-90" aria-hidden>›</span>
           Read exactly what they will be told
         </summary>
-        <pre className="panel mt-3 max-w-3xl rounded-lg px-5 py-5 font-sans text-[13px] leading-relaxed whitespace-pre-wrap text-muted md:px-6">
+        <pre className="panel mt-3 max-w-3xl px-5 py-5 font-sans text-[13px] leading-relaxed whitespace-pre-wrap text-muted md:px-6">
           {preview.task}
         </pre>
       </details>

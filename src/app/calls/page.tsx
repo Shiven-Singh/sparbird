@@ -30,7 +30,7 @@ export default async function CallsPage() {
     }
   }
 
-  const cols = "grid-cols-[minmax(0,1fr)_96px] sm:grid-cols-[130px_minmax(0,1fr)_110px_80px_70px_80px]";
+  const cols = "grid-cols-[minmax(0,1fr)_96px] sm:grid-cols-[130px_minmax(0,1fr)_160px_80px_70px_80px]";
 
   return (
     <div className="px-5 py-6 md:px-12 md:py-10">
@@ -51,8 +51,8 @@ export default async function CallsPage() {
       </header>
 
       {attempts.length > 0 ? (
-        <section className="panel appear appear--soft d-2 mt-8 rounded-lg">
-          <div className={`label grid ${cols} gap-4 border-b border-border-soft px-4 py-3 text-muted sm:px-6`}>
+        <section className="panel striped appear appear--soft d-2 mt-8">
+          <div className={`label panel-head grid ${cols} gap-4 px-4 py-3 text-muted sm:px-6`}>
             <span className="hidden sm:block">When</span>
             <span>Who</span>
             <span className="text-right">Landed</span>
@@ -64,11 +64,11 @@ export default async function CallsPage() {
             <Link
               key={a.id}
               href={`/attempt/${encodeURIComponent(a.id)}`}
-              className={`grid ${cols} items-center gap-4 border-b border-border-soft px-4 py-3 transition-colors last:border-b-0 hover:bg-panel-2 sm:px-6`}
+              className={`grid ${cols} items-center gap-4 px-4 py-3 transition-colors hover:bg-panel-2 sm:px-6`}
             >
               <span className="tnum hidden text-[13px] text-muted sm:block">{when(a.createdAt)}</span>
               <span className="flex min-w-0 items-center gap-3">
-                <span className="grid size-9 shrink-0 place-items-center rounded-md border border-border-soft bg-panel">
+                <span className="grid size-9 shrink-0 place-items-center bg-panel">
                   <Avatar seed={a.personaId} className="size-8" />
                 </span>
                 <span className="min-w-0">
@@ -76,7 +76,7 @@ export default async function CallsPage() {
                   <span className="tnum block text-[12px] text-muted sm:hidden">{when(a.createdAt)}</span>
                 </span>
               </span>
-              <span className="tnum flex items-center justify-end gap-2 text-right text-[14px] text-text">
+              <span className="tnum flex items-center justify-end gap-2 text-right text-[14px] whitespace-nowrap text-text">
                 {a.disposition === "unscored" ? (
                   <span className="text-muted">not graded</span>
                 ) : (

@@ -9,7 +9,12 @@
     "engages_if": "you say the actual thing in the first minute instead of circling it",
     "agrees_if": "you hold the position while still treating them like a person"
   },
-  "voice": { "locale": "en-US", "region": "US", "pace": "measured", "patience": "low" },
+  "voice": {
+    "locale": "en-US",
+    "region": "US",
+    "pace": "measured",
+    "patience": "low"
+  },
   "style": [
     "reacts emotionally before reacting reasonably",
     "tries to renegotiate what has already been decided",
@@ -20,16 +25,42 @@
   "hidden_state": {
     "engages_only_if": "the trainee states the decision plainly instead of softening it into vagueness",
     "scripted_objections": [
-      { "after_turn": 2, "text": "After everything, this is what you are telling me?" },
-      { "after_turn": 4, "text": "Can we not just keep things the way they were?" }
+      {
+        "after_turn": 2,
+        "text": "After everything, this is what you are telling me?"
+      },
+      {
+        "after_turn": 4,
+        "text": "Can we not just keep things the way they were?"
+      }
     ],
     "concession": "accepts the decision only once the trainee has said it plainly and given one concrete reason"
   },
   "rubric": [
-    { "id": "said_the_thing", "weight": 3, "description": "Said the actual thing in the first minute", "evidence": "the decision stated plainly, not implied" },
-    { "id": "gave_a_reason", "weight": 2, "description": "Gave one concrete reason", "evidence": "a specific fact rather than a feeling" },
-    { "id": "held_position", "weight": 3, "description": "Held the position through the pushback", "evidence": "returns to the same decision after being challenged" },
-    { "id": "stayed_human", "weight": 2, "description": "Acknowledged what it cost them", "evidence": "words that recognize the other person's position" }
+    {
+      "id": "said_the_thing",
+      "weight": 3,
+      "description": "You said the hard thing in the first minute",
+      "evidence": "the decision stated plainly, not implied"
+    },
+    {
+      "id": "gave_a_reason",
+      "weight": 2,
+      "description": "You gave one concrete reason",
+      "evidence": "a specific fact rather than a feeling"
+    },
+    {
+      "id": "held_position",
+      "weight": 3,
+      "description": "You held your position when they pushed",
+      "evidence": "returns to the same decision after being challenged"
+    },
+    {
+      "id": "stayed_human",
+      "weight": 2,
+      "description": "You acknowledged what it cost them",
+      "evidence": "words that recognize the other person's position"
+    }
   ],
   "max_minutes": 5
 }

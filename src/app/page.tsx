@@ -69,7 +69,7 @@ export default async function Home({
 
       <section className="appear appear--soft d-5 mt-8 grid gap-3 md:grid-cols-3">
         {PROMISES.map(([title, body, d]) => (
-          <div key={title} className="panel flex gap-4 rounded-lg p-5">
+          <div key={title} className="panel flex gap-4 p-5">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="#e8e8e8" aria-hidden className="mt-0.5 shrink-0">
               <path d={d} />
             </svg>

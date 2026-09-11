@@ -39,25 +39,25 @@
     {
       "id": "owned_decision",
       "weight": 3,
-      "description": "Named a decision they personally made",
+      "description": "You named a decision you made yourself",
       "evidence": "first-person account of a specific choice"
     },
     {
       "id": "quantified_result",
       "weight": 2,
-      "description": "Gave a number behind a claim",
+      "description": "You backed a claim with a number",
       "evidence": "a measured outcome"
     },
     {
       "id": "honest_failure",
       "weight": 2,
-      "description": "Described a real failure without deflecting",
+      "description": "You gave a straight answer about something that went wrong",
       "evidence": "names something that did not work"
     },
     {
       "id": "secured_next_step",
       "weight": 3,
-      "description": "Got a concrete next step",
+      "description": "You got them to agree to a specific next step",
       "evidence": "the persona agrees to a specific follow-up"
     }
   ],

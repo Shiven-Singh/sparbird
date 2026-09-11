@@ -38,7 +38,7 @@ export function TakeCall({ personaId, live, destinationMasked, tone, intent }: P
 
   if (busy) {
     return (
-      <div className="panel rounded-lg px-5 py-4">
+      <div className="panel px-5 py-4">
         <p className="text-[16px] font-medium tracking-[-0.03em] text-text">
           {live ? "Calling you now. Pick up." : "One moment."}
         </p>
@@ -53,7 +53,7 @@ export function TakeCall({ personaId, live, destinationMasked, tone, intent }: P
 
   if (live && armed) {
     return (
-      <div className="panel rounded-lg px-5 py-4">
+      <div className="panel px-5 py-4">
         <p className="text-[14px] text-text">
           Your phone will ring on <span className="tnum font-medium">{destinationMasked}</span> in a
           few seconds. Be somewhere you can talk out loud.

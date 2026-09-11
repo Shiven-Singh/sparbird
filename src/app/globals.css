@@ -13,8 +13,6 @@
   --color-text-2: #d8d8d8;
   --color-muted: #9a9a9a;
   --color-faint: #6b6b6b;
-  --color-border: rgba(255, 255, 255, 0.16);
-  --color-border-soft: rgba(255, 255, 255, 0.1);
   --color-mark: #ffffff;
   --color-mark-ink: #000000;
 
@@ -105,11 +103,19 @@ body {
   text-transform: uppercase;
 }
 
-/* a panel on the black */
+/* a block on the black. no outline, no curve: it is separated by its ground, not by a line */
 .panel {
   background: var(--color-panel);
-  border: 1px solid var(--color-border-soft);
 }
+/* a block that carries a verdict, tinted rather than outlined */
+.panel-good { background: linear-gradient(180deg, var(--color-good-soft), var(--color-panel) 120px); }
+.panel-bad { background: linear-gradient(180deg, var(--color-bad-soft), var(--color-panel) 120px); }
+.panel-warn { background: linear-gradient(180deg, var(--color-warn-soft), var(--color-panel) 120px); }
+
+/* the strip that names a panel. a change of ground, not a line under it */
+.panel-head { background: rgba(255, 255, 255, 0.05); }
+/* rows told apart by alternating ground */
+.striped > *:nth-child(even) { background: rgba(255, 255, 255, 0.022); }
 
 /* the badge above a headline */
 .badge {
@@ -117,7 +123,6 @@ body {
   align-items: center;
   gap: 8px;
   padding: 8px 14px;
-  border-radius: 5px;
   background: linear-gradient(90deg, #7d7d7d 0%, #2a2a2a 52%, #0a0a0a 100%);
   color: #f2f2f2;
   font-size: 12.5px;
@@ -135,14 +140,13 @@ body {
   gap: 8px;
   height: 40px;
   padding: 0 16px;
-  border-radius: 6px;
   font-size: 13.5px;
   font-weight: 500;
   letter-spacing: -0.02em;
   line-height: 1;
   white-space: nowrap;
   cursor: pointer;
-  transition: background 0.35s ease, border-color 0.35s ease, box-shadow 0.35s ease, color 0.35s ease;
+  transition: background 0.35s ease, box-shadow 0.35s ease, color 0.35s ease;
 }
 .btn::after {
   content: "";
@@ -159,26 +163,20 @@ body {
 .btn-solid {
   background: linear-gradient(180deg, #ffffff 0%, #e7e7e7 48%, #cfcfcf 100%);
   color: #111111;
-  border: 1px solid #ffffff;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.95);
 }
 .btn-solid:hover {
   background: linear-gradient(180deg, #ffffff 0%, #f3f3f3 42%, #dcdcdc 100%);
-  box-shadow: inset 0 1px 0 #ffffff, 0 0 22px rgba(255, 255, 255, 0.22), 0 8px 18px rgba(255, 255, 255, 0.1);
+  box-shadow: 0 0 22px rgba(255, 255, 255, 0.2);
 }
 
 .btn-ghost {
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.12), rgba(0, 0, 0, 0.5) 46%, rgba(255, 255, 255, 0.06));
+  background: rgba(255, 255, 255, 0.09);
   color: #ffffff;
-  border: 1px solid rgba(198, 198, 198, 0.5);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
 }
 .btn-ghost:hover {
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.18), rgba(0, 0, 0, 0.35) 48%, rgba(255, 255, 255, 0.12));
-  border-color: rgba(235, 235, 235, 0.8);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.22), 0 0 20px rgba(255, 255, 255, 0.16);
+  background: rgba(255, 255, 255, 0.16);
 }
 
 /* a liquid-metal pill for small navigation */
@@ -190,14 +188,12 @@ body {
   gap: 8px;
   height: 34px;
   padding: 0 14px;
-  border-radius: 7px;
-  border: 1px solid rgba(198, 198, 198, 0.4);
-  background: linear-gradient(105deg, #050505 0%, #2a2a2a 48%, #4a4a4a 100%);
+  background: rgba(255, 255, 255, 0.07);
   color: #f3f3f3;
   font-size: 13px;
   letter-spacing: -0.01em;
   white-space: nowrap;
-  transition: background 0.35s ease, border-color 0.35s ease, box-shadow 0.35s ease;
+  transition: background 0.35s ease, color 0.35s ease;
 }
 .pill::before {
   content: "";
@@ -209,25 +205,22 @@ body {
 }
 .pill:hover::before { transform: translateX(120%); }
 .pill:hover {
-  border-color: rgba(235, 235, 235, 0.9);
-  background: linear-gradient(105deg, #111111 0%, #3a3a3a 45%, #6a6a6a 100%);
-  box-shadow: 0 0 18px rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.14);
 }
 
 .field {
   width: 100%;
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid var(--color-border-soft);
-  border-radius: 6px;
-  padding: 10px 12px;
+  background: rgba(255, 255, 255, 0.07);
+  border: 0;
+  padding: 11px 13px;
   font-size: 14px;
   color: #ffffff;
-  transition: border-color 0.2s ease, background 0.2s ease;
+  transition: background 0.2s ease, box-shadow 0.2s ease;
 }
 .field::placeholder { color: var(--color-faint); }
 .field:focus {
-  border-color: rgba(255, 255, 255, 0.6);
-  background: rgba(255, 255, 255, 0.06);
+  background: rgba(255, 255, 255, 0.11);
+  box-shadow: inset 0 -2px 0 #ffffff;
   outline: none;
 }
 
@@ -238,9 +231,7 @@ body {
   width: 44px;
   height: 44px;
   flex: 0 0 auto;
-  border-radius: 6px;
-  border: 1px solid var(--color-border);
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.02));
+  background: rgba(255, 255, 255, 0.09);
   color: #ffffff;
   font-weight: 600;
   font-size: 14px;
@@ -249,7 +240,6 @@ body {
 .tile-mark {
   background: linear-gradient(180deg, #ffffff 0%, #e7e7e7 48%, #cfcfcf 100%);
   color: #000000;
-  border-color: #ffffff;
 }
 
 /* the words that earned the point: white on black */
@@ -257,7 +247,6 @@ mark {
   background: var(--color-mark);
   color: var(--color-mark-ink);
   padding: 0.05em 0.2em 0.1em;
-  border-radius: 2px;
   box-decoration-break: clone;
   -webkit-box-decoration-break: clone;
 }
@@ -267,17 +256,12 @@ mark.warn {
   color: #1a1400;
 }
 
-/* a panel that carries a verdict: a hairline of color on the top edge only */
-.panel-good { border-top: 2px solid var(--color-good); }
-.panel-bad { border-top: 2px solid var(--color-bad); }
-.panel-warn { border-top: 2px solid var(--color-warn); }
-
 /* a small status dot */
 .dot { display: inline-block; width: 8px; height: 8px; border-radius: 999px; flex: 0 0 auto; }
 .dot-good { background: var(--color-good); }
 .dot-bad { background: var(--color-bad); }
 .dot-warn { background: var(--color-warn); }
-.dot-none { box-shadow: inset 0 0 0 1px var(--color-muted); }
+.dot-none { background: rgba(255, 255, 255, 0.2); }
 
 .tnum {
   font-variant-numeric: tabular-nums;
@@ -321,13 +305,16 @@ mark.warn {
 
 /* a pill that is currently chosen */
 .pill-on {
-  border-color: #ffffff;
   background: linear-gradient(180deg, #ffffff 0%, #e7e7e7 48%, #cfcfcf 100%);
   color: #111111;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.95);
 }
 .pill-on::before { display: none; }
 .pill-on:hover {
   background: linear-gradient(180deg, #ffffff 0%, #f3f3f3 42%, #dcdcdc 100%);
-  box-shadow: inset 0 1px 0 #ffffff, 0 0 18px rgba(255, 255, 255, 0.18);
 }
+
+/* the line being spoken while a call plays back */
+.turn { transition: background 0.2s ease; }
+/* the caller's lines sit on their own ground, so you can see who held the floor */
+.turn-them { background: rgba(255, 255, 255, 0.022); }
+.turn.is-speaking { background: rgba(255, 255, 255, 0.08); }

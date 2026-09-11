@@ -40,25 +40,25 @@
     {
       "id": "quantified_ask",
       "weight": 3,
-      "description": "Named a number for the ask",
+      "description": "You put a number on what you were asking for",
       "evidence": "a figure for money, users, or time"
     },
     {
       "id": "survived_interrupt",
       "weight": 2,
-      "description": "Held the point through the first objection",
+      "description": "You finished your point after they cut you off",
       "evidence": "returns to the same claim after being cut off"
     },
     {
       "id": "unit_economics",
       "weight": 2,
-      "description": "Answered the cost question with a figure",
+      "description": "You answered the cost question with a real figure",
       "evidence": "a per-unit cost, today or at scale"
     },
     {
       "id": "secured_next_step",
       "weight": 3,
-      "description": "Got a concrete next step",
+      "description": "You got them to agree to a specific next step",
       "evidence": "the persona agrees to a specific follow-up"
     }
   ],

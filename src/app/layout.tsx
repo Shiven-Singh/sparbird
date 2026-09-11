@@ -67,7 +67,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       <body style={{ background: "#000", color: "#fff" }} className="min-h-screen">
         <div className="grain" aria-hidden />
         <div className="md:grid md:min-h-screen md:grid-cols-[256px_minmax(0,1fr)]">
-          <aside className="border-b border-border-soft md:sticky md:top-0 md:flex md:h-screen md:flex-col md:border-r md:border-b-0">
+          <aside className="panel md:sticky md:top-0 md:flex md:h-screen md:flex-col">
             {/* phone: one bar */}
             <div className="flex items-center justify-between gap-3 px-4 py-3 md:hidden">
               <Link href="/" className="inline-block" aria-label="Sparbird">
@@ -124,7 +124,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
                       <li key={a.id}>
                         <Link
                           href={`/attempt/${encodeURIComponent(a.id)}`}
-                          className="flex items-start gap-2.5 rounded-md px-2 py-2 transition-colors hover:bg-panel-2"
+                          className="flex items-start gap-2.5 px-2 py-2 transition-colors hover:bg-panel-2"
                         >
                           <span
                             aria-hidden
@@ -163,7 +163,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
                 )}
               </div>
 
-              <div className="border-t border-border-soft px-5 py-4">
+              <div className="panel-head px-5 py-4">
                 <p className="mb-3 flex items-center gap-2 text-[12px] text-muted">
                   <span aria-hidden className={`dot ${live ? "dot-good" : "dot-none"}`} />
                   {live ? "Your phone can ring" : "Nothing will ring"}

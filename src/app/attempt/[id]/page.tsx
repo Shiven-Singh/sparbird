@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { currentUser } from "@/lib/auth";
+import { CallPlayback } from "@/components/call-playback";
 import { getStore } from "@/lib/db";
 import { describeSettings, loadPersona } from "@/lib/persona";
 import type { FlagKind, RubricVerdict } from "@/lib/types";
@@ -124,7 +125,7 @@ export default async function AttemptPage({ params }: { params: Promise<{ id: st
 
       {card.disputed ? (
         <p className="appear appear--soft d-3 mt-5 text-[13px] leading-relaxed text-text-2">
-          <span className="label mr-2 rounded-sm border border-warn/40 bg-warn-soft px-1.5 py-0.5 text-warn">Went with the recording</span>
+          <span className="label mr-2 bg-warn-soft px-1.5 py-0.5 text-warn">Went with the recording</span>
           The call service summarized this call in a way the recording does not support, so its
           summary was ignored. Everything on this page comes from what was actually said.
         </p>
@@ -136,11 +137,11 @@ export default async function AttemptPage({ params }: { params: Promise<{ id: st
             ["What worked", review.good, "Nothing landed on this call.", "good"],
             ["What hurt", review.bad, "Nothing on this call worked against you.", "bad"],
           ].map(([title, points, empty, tone]) => (
-            <div key={title as string} className={`panel rounded-lg ${tone === "good" ? "panel-good" : "panel-bad"}`}>
-              <p className={`label border-b border-border-soft px-5 py-3 ${tone === "good" ? "text-good" : "text-bad"}`}>
+            <div key={title as string} className={`panel ${tone === "good" ? "panel-good" : "panel-bad"}`}>
+              <p className={`label panel-head px-5 py-3 ${tone === "good" ? "text-good" : "text-bad"}`}>
                 {title as string}
               </p>
-              <ul className="divide-y divide-border-soft px-5">
+              <ul className="px-5">
                 {(points as typeof review.good).length === 0 ? (
                   <li className="py-3 text-[13px] text-muted">{empty as string}</li>
                 ) : (
@@ -162,9 +163,9 @@ export default async function AttemptPage({ params }: { params: Promise<{ id: st
             </div>
           ))}
 
-          <div className="panel panel-warn rounded-lg">
-            <p className="label border-b border-border-soft px-5 py-3 text-warn">Watch out</p>
-            <ul className="divide-y divide-border-soft px-5">
+          <div className="panel panel-warn">
+            <p className="label panel-head px-5 py-3 text-warn">Watch out</p>
+            <ul className="px-5">
               {review.flags.length === 0 ? (
                 <li className="py-3 text-[13px] text-muted">
                   Nothing you said needs walking back. No promises, no absolutes, no pressure.
@@ -189,9 +190,18 @@ export default async function AttemptPage({ params }: { params: Promise<{ id: st
         </section>
       ) : null}
 
+      <div className="appear appear--soft d-4 mt-6">
+        <CallPlayback
+          transcript={attempt.transcript}
+          recordingUrl={attempt.recordingUrl}
+          providerCallId={attempt.providerCallId}
+          live={attempt.live}
+        />
+      </div>
+
       <section className="appear appear--soft d-4 mt-6 grid gap-6 lg:grid-cols-[minmax(0,1fr)_280px]">
-        <div className="panel rounded-lg">
-          <div className={`label grid ${rowCols} gap-x-3 border-b border-border-soft px-4 py-3 text-muted sm:gap-x-4 sm:px-6`}>
+        <div className="panel">
+          <div className={`label panel-head grid ${rowCols} gap-x-3 px-4 py-3 text-muted sm:gap-x-4 sm:px-6`}>
             <span>Time</span>
             <span>Who</span>
             <span>The call</span>
@@ -204,7 +214,8 @@ export default async function AttemptPage({ params }: { params: Promise<{ id: st
               <div
                 key={index}
                 id={`turn-${index}`}
-                className={`grid ${rowCols} scroll-mt-6 gap-x-3 border-b border-border-soft px-4 py-3.5 last:border-b-0 sm:gap-x-4 sm:px-6`}
+                data-turn={index}
+                className={`turn grid ${rowCols} scroll-mt-6 gap-x-3 px-4 py-3.5 sm:gap-x-4 sm:px-6 ${mine ? "" : "turn-them"}`}
               >
                 <span className="tnum pt-0.5 text-[12px] text-faint">{timecode(turn.offset_seconds)}</span>
                 <span className={`label pt-1 ${mine ? "text-text" : "text-faint"}`}>{mine ? "You" : "Them"}</span>
@@ -236,9 +247,9 @@ export default async function AttemptPage({ params }: { params: Promise<{ id: st
 
         {card.verdicts.length > 0 ? (
           <aside className="lg:sticky lg:top-8 lg:self-start">
-            <div className="panel rounded-lg">
-              <p className="label border-b border-border-soft px-5 py-3 text-muted">What they needed to hear</p>
-              <ul className="divide-y divide-border-soft px-5">
+            <div className="panel">
+              <p className="label panel-head px-5 py-3 text-muted">What they needed to hear</p>
+              <ul className="px-5">
                 {card.verdicts.map((verdict) => (
                   <li key={verdict.id} className="flex gap-3 py-3">
                     <span aria-hidden className={`dot mt-1.5 ${verdict.met ? "dot-good" : "dot-none"}`} />
@@ -257,7 +268,8 @@ export default async function AttemptPage({ params }: { params: Promise<{ id: st
                   </li>
                 ))}
               </ul>
-              <dl className="divide-y divide-border-soft border-t border-border-soft px-5">
+              <p className="label panel-head px-5 py-3 text-muted">How the call ran</p>
+              <dl className="px-5 py-1.5">
                 {[
                   [
                     "You talked",

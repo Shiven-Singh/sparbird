@@ -80,25 +80,25 @@ const BASE_RUBRIC = [
   {
     id: "answered_their_priority",
     weight: 3,
-    description: "Answered the thing they actually care about",
+    description: "You answered the thing they actually care about",
     evidence: "a direct answer to their first objection",
   },
   {
     id: "quantified_claim",
     weight: 2,
-    description: "Backed a claim with a number",
+    description: "You backed a claim with a number",
     evidence: "a figure for money, time, or people",
   },
   {
     id: "survived_interrupt",
     weight: 2,
-    description: "Held the point through the pushback",
+    description: "You finished your point after they pushed back",
     evidence: "returns to the same claim after being cut off",
   },
   {
     id: "secured_next_step",
     weight: 3,
-    description: "Got a concrete next step",
+    description: "You got them to agree to a specific next step",
     evidence: "the persona agrees to a specific follow-up",
   },
 ];

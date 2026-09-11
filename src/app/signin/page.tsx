@@ -17,7 +17,7 @@ export default async function SignInPage() {
         Welcome <em>back</em>.
       </h1>
       <p className="mt-2 text-[15px] text-muted">Your callers and your past calls are where you left them.</p>
-      <div className="panel appear appear--soft d-3 mt-8 rounded-lg p-6">
+      <div className="panel appear appear--soft d-3 mt-8 p-6">
         <AuthForm mode="signin" />
       </div>
     </div>

@@ -128,7 +128,7 @@ export function AudienceUpload() {
 
   return (
     <div className="flex flex-col gap-4">
-      <label className="panel flex cursor-pointer flex-col items-center justify-center gap-2 rounded-lg border-dashed px-5 py-8 text-center transition-colors hover:bg-panel-2">
+      <label className="panel flex cursor-pointer flex-col items-center justify-center gap-2 px-5 py-8 text-center transition-colors hover:bg-panel-2">
         <input
           type="file"
           accept=".csv,.json,.txt,.md,text/csv,application/json,text/plain"
@@ -151,11 +151,11 @@ export function AudienceUpload() {
       </p>
 
       {profiles.length > 0 ? (
-        <div className="panel rounded-lg">
-          <p className="label border-b border-border-soft px-4 py-2.5 text-muted">
+        <div className="panel">
+          <p className="label panel-head px-4 py-2.5 text-muted">
             {profiles.length} {profiles.length === 1 ? "person" : "people"} ready
           </p>
-          <ul className="max-h-56 divide-y divide-border-soft overflow-y-auto px-4">
+          <ul className="striped max-h-56 overflow-y-auto px-4">
             {profiles.map((p, i) => (
               <li key={i} className="py-2 text-[13px]">
                 <span className="text-text">{p.headline || "No headline"}</span>

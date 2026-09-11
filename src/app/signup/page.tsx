@@ -27,7 +27,7 @@ export default async function SignUpPage({
       <p className="mt-2 text-[15px] text-muted">
         {plan.price} · {plan.minutes}. No card needed to set up; billing starts when you place your first call.
       </p>
-      <div className="panel appear appear--soft d-3 mt-8 rounded-lg p-6">
+      <div className="panel appear appear--soft d-3 mt-8 p-6">
         <AuthForm mode="signup" plan={plan.id} />
       </div>
     </div>

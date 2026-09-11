@@ -40,25 +40,25 @@
     {
       "id": "reframed_to_cost",
       "weight": 3,
-      "description": "Moved from price to cost of the status quo",
+      "description": "You showed them what their current way is costing",
       "evidence": "names what the current process costs"
     },
     {
       "id": "held_price",
       "weight": 2,
-      "description": "Did not discount on the first ask",
+      "description": "You held your price when they asked for a discount",
       "evidence": "declines or defers the discount request"
     },
     {
       "id": "found_decider",
       "weight": 2,
-      "description": "Established who else decides",
+      "description": "You found out who else has to say yes",
       "evidence": "asks about other stakeholders"
     },
     {
       "id": "secured_next_step",
       "weight": 3,
-      "description": "Got a concrete next step",
+      "description": "You got them to agree to a specific next step",
       "evidence": "the persona agrees to a specific follow-up"
     }
   ],

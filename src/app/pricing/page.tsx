@@ -46,7 +46,7 @@ export default async function PricingPage() {
         {PLANS.map((plan) => (
           <div
             key={plan.id}
-            className={`panel flex flex-col rounded-lg p-6 ${plan.featured ? "border-border panel-good" : ""}`}
+            className={`panel flex flex-col p-6 ${plan.featured ? "panel-good" : ""}`}
           >
             <div className="flex items-baseline justify-between gap-3">
               <h2 className="text-[17px] font-medium tracking-[-0.03em] text-text">{plan.name}</h2>
@@ -83,9 +83,9 @@ export default async function PricingPage() {
 
       <section className="appear appear--soft d-4 mt-14 max-w-3xl">
         <h2 className="text-[20px] font-medium tracking-[-0.03em] text-text">Questions people actually ask</h2>
-        <dl className="mt-5 divide-y divide-border-soft border-t border-border-soft">
+        <dl className="mt-5">
           {FAQ.map(([q, a]) => (
-            <div key={q} className="py-4">
+            <div key={q} className="panel mt-2 p-5">
               <dt className="text-[15px] font-medium text-text">{q}</dt>
               <dd className="mt-1.5 text-[14px] leading-relaxed text-muted">{a}</dd>
             </div>

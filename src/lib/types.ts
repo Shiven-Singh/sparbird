@@ -111,6 +111,10 @@ export interface DrillOutcome {
   startedAt: string;
   /** Set when the trainee chose a tone or intent for this call. */
   settings?: CallSettings;
+  /** The provider's own id for the call, which is how the CALL-E dashboard finds it. */
+  providerCallId?: string | null;
+  /** Audio, when there is any. CALL-E does not return a recording today. */
+  recordingUrl?: string | null;
 }
 
 export interface EvidenceSpan {

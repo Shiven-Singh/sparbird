@@ -54,9 +54,12 @@ const COST_WORDS = /\b(cost|costs|cents|dollars|rupees|price|priced|margin|spend
 /** Marks a figure as being about one unit rather than a total. */
 const PER_UNIT = /\b(per|each|unit|invoice|apiece|a piece)\b/i;
 
-const AGREEMENT = /\b(send me|send it|i will take|i'll take|second call|next week|book|schedule|set something up|follow up|follow-up|come back to me|let's talk)\b/i;
+/** What agreeing to a next step sounds like, including a day and a time. */
+export const AGREEMENT =
+  /\b(send me|send it|i will take|i'll take|second call|next week|book|schedule|set something up|follow up|follow-up|come back to me|let's talk|come by|come round|see you|that works|works for (?:me|us)|let's do|sounds good|(?:monday|tuesday|wednesday|thursday|friday|saturday|sunday)[^.?!]{0,24}(?:works|at \\d|at (?:six|seven|eight|nine|ten|eleven|twelve)))\b/i;
 
-const REFUSAL = /\b(not going to|won't take|will not take|no thanks|we are done|we're done|good luck|come back when|i'll pass|i will pass|not interested|stop you there)\b/i;
+export const REFUSAL =
+  /\b(not going to|won't take|will not take|no thanks|we are done|we're done|good luck|come back when|i'll pass|i will pass|not interested|stop you there)\b/i;
 
 const FIRST_PERSON_DECISION = /\b(i decided|i chose|i made the call|i owned|i pushed|i argued|my call|i cut|i shipped)\b/i;
 
@@ -234,9 +237,13 @@ function findSurvivedInterrupt(transcript: TranscriptTurn[]): Hit | null {
 
 type Check = (transcript: TranscriptTurn[]) => Hit | null;
 
-/** Picks a check for a rubric item from the plain-words evidence description. */
+/**
+ * Picks a check from the item's `evidence`, and only from there. The description is copy for a
+ * person and gets reworded; if matching read it too, editing a sentence on a card would silently
+ * change what a call scores.
+ */
 function checkFor(item: RubricItem): Check | null {
-  const e = `${item.evidence} ${item.description}`.toLowerCase();
+  const e = item.evidence.toLowerCase();
 
   if (/agree|follow-up|follow up|next step|specific time|visit/.test(e)) {
     return (t) => findAgreement(t);
@@ -280,7 +287,7 @@ function checkFor(item: RubricItem): Check | null {
       return hit ? { ...hit, pattern: ACKNOWLEDGMENT } : null;
     };
   }
-  if (/cut off|interrupt|same claim|pushback|after the objection/.test(e)) {
+  if (/cut off|interrupt|same claim|same decision|pushback|after the objection|after being challenged/.test(e)) {
     return (t) => findSurvivedInterrupt(t);
   }
   if (/cost|per-unit|per unit|price/.test(e)) {
@@ -348,7 +355,7 @@ function pointsFrom({ verdicts, metrics }: ReviewInput): { good: ReviewPoint[]; 
 
   for (const v of verdicts) {
     if (v.met) good.push({ text: v.description, span: v.span });
-    else bad.push({ text: `Never ${lowerFirst(v.description)}`, span: null });
+    else bad.push({ text: v.description.replace(/^You /, "You never "), span: null });
   }
 
   const ratio = metrics.talkRatioTrainee;

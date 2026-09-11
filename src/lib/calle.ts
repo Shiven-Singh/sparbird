@@ -116,8 +116,28 @@ function firstAttemptFailure(call: Record<string, unknown>): { code: string | nu
   return { code: null, message: null };
 }
 
+/** The provider's id for the last attempt, and a recording if one is ever returned. */
+function attemptExtras(call: Record<string, unknown>): { providerCallId: string | null; recordingUrl: string | null } {
+  const recipients = (call.recipients as Array<Record<string, unknown>> | undefined) ?? [];
+  for (const recipient of recipients) {
+    const attempts = (recipient.attempts as Array<Record<string, unknown>> | undefined) ?? [];
+    for (let i = attempts.length - 1; i >= 0; i -= 1) {
+      const attempt = attempts[i];
+      if (!attempt) continue;
+      const recording =
+        (attempt.recordingUrl as string | undefined) ??
+        (attempt.recording_url as string | undefined) ??
+        null;
+      const provider = (attempt.providerCallId as string | undefined) ?? null;
+      if (provider || recording) return { providerCallId: provider, recordingUrl: recording };
+    }
+  }
+  return { providerCallId: null, recordingUrl: null };
+}
+
 function normalise(call: Record<string, unknown>, personaId: string, live: boolean): DrillOutcome {
   const attemptFailure = firstAttemptFailure(call);
+  const extras = attemptExtras(call);
   return {
     callId: (call.id as string) ?? "unknown",
     personaId,
@@ -133,6 +153,8 @@ function normalise(call: Record<string, unknown>, personaId: string, live: boole
     failureCode: (call.failureCode as string | null) ?? attemptFailure.code,
     failureMessage: (call.failureMessage as string | null) ?? attemptFailure.message,
     startedAt: new Date().toISOString(),
+    providerCallId: extras.providerCallId,
+    recordingUrl: extras.recordingUrl,
   };
 }
 
