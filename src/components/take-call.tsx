@@ -36,8 +36,8 @@ export function TakeCall({ personaId, live, destinationMasked }: Props) {
 
   if (busy) {
     return (
-      <div className="border-2 border-rule bg-white px-5 py-4">
-        <p className="display text-[18px] text-ink">
+      <div className="panel rounded-lg px-5 py-4">
+        <p className="text-[16px] font-medium tracking-[-0.03em] text-text">
           {live ? "Calling you now. Pick up." : "One moment."}
         </p>
         <p className="mt-1 text-[13px] text-muted">
@@ -51,16 +51,16 @@ export function TakeCall({ personaId, live, destinationMasked }: Props) {
 
   if (live && armed) {
     return (
-      <div className="border-2 border-rule bg-white px-5 py-4">
-        <p className="text-[14px] text-ink">
+      <div className="panel rounded-lg px-5 py-4">
+        <p className="text-[14px] text-text">
           Your phone will ring on <span className="tnum font-medium">{destinationMasked}</span> in a
           few seconds. Be somewhere you can talk out loud.
         </p>
         <div className="mt-4 flex gap-2">
-          <button type="button" onClick={run} className="btn btn-mark">
+          <button type="button" onClick={run} className="btn btn-solid">
             Ring my phone
           </button>
-          <button type="button" onClick={() => setArmed(false)} className="btn btn-secondary">
+          <button type="button" onClick={() => setArmed(false)} className="btn btn-ghost">
             Not yet
           </button>
         </div>
@@ -70,10 +70,10 @@ export function TakeCall({ personaId, live, destinationMasked }: Props) {
 
   return (
     <div>
-      <button type="button" onClick={() => (live ? setArmed(true) : run())} className="btn">
+      <button type="button" onClick={() => (live ? setArmed(true) : run())} className="btn btn-solid h-[42px] px-[18px]">
         {live ? "Call me now" : "Play a call that already happened"}
       </button>
-      {error ? <p className="mt-3 text-[13px] text-no">{error}</p> : null}
+      {error ? <p className="mt-3 text-[13px] text-text-2">{error}</p> : null}
     </div>
   );
 }

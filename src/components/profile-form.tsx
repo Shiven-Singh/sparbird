@@ -112,15 +112,15 @@ export function ProfileForm({ sample }: { sample: Sample }) {
       </div>
 
       <div className="flex flex-wrap items-center gap-4 pt-1">
-        <button type="submit" disabled={busy} className="btn">
+        <button type="submit" disabled={busy} className="btn btn-solid">
           {busy ? "Reading them" : "Read them"}
         </button>
-        <button type="button" onClick={fillSample} className="btn btn-secondary">
+        <button type="button" onClick={fillSample} className="btn btn-ghost">
           Use the sample profile
         </button>
       </div>
 
-      {error ? <p className="text-[13px] text-no">{error}</p> : null}
+      {error ? <p className="text-[13px] text-text-2">{error}</p> : null}
     </form>
   );
 }

@@ -11,21 +11,23 @@ export default function FromProfilePage() {
   ) as { name: string; headline: string; about: string; recent_posts: string[] };
 
   return (
-    <div className="px-8 py-8 md:px-10">
-      <Link href="/" className="label text-muted hover:text-ink">
+    <div className="px-8 py-10 md:px-12">
+      <Link href="/" className="pill appear appear--scale d-1">
         ← All callers
       </Link>
 
-      <header className="rise mt-4">
-        <h1 className="display text-[34px] text-ink">Build one from a profile</h1>
-        <p className="mt-2 max-w-xl text-[15px] leading-relaxed text-ink-2">
+      <header className="appear appear--soft d-2 mt-6 max-w-3xl">
+        <h1 className="h1 text-[36px] text-text">
+          Practise on the <em>person</em>, not a type.
+        </h1>
+        <p className="mt-3 max-w-[520px] text-[15.5px] leading-[1.55] tracking-[-0.015em] text-muted">
           Paste what a real person says about themselves. We read it for how they will push back,
           show the working, and put them on the line.
         </p>
       </header>
 
-      <section className="rise rise-2 mt-8 grid gap-6 md:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)]">
-        <div className="sheet px-6 py-6">
+      <section className="appear appear--soft d-3 mt-8 grid gap-6 md:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)]">
+        <div className="panel rounded-lg px-6 py-6">
           <ProfileForm sample={sample} />
         </div>
 
@@ -46,7 +48,7 @@ export default function FromProfilePage() {
           ].map(([h, body]) => (
             <div key={h}>
               <p className="label text-muted">{h}</p>
-              <p className="mt-2 text-[14px] leading-relaxed text-ink-2">{body}</p>
+              <p className="mt-2 text-[14px] leading-relaxed text-text-2">{body}</p>
             </div>
           ))}
         </aside>

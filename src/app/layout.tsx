@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { DM_Serif_Display, Hanken_Grotesk, Poppins } from "next/font/google";
+import { Instrument_Serif, Inter } from "next/font/google";
 import Link from "next/link";
 import { Wordmark } from "@/components/logo";
 import { isLive } from "@/lib/calle";
@@ -8,25 +8,17 @@ import { loadPersona } from "@/lib/persona";
 import { ensureSeeded } from "@/lib/seed";
 import "./globals.css";
 
-const poppins = Poppins({
+const inter = Inter({
   subsets: ["latin"],
-  weight: ["600", "700"],
-  variable: "--font-poppins",
+  variable: "--font-inter",
   display: "swap",
 });
 
-const dmSerif = DM_Serif_Display({
+const instrument = Instrument_Serif({
   subsets: ["latin"],
   weight: "400",
-  style: ["normal", "italic"],
-  variable: "--font-dmserif",
-  display: "swap",
-});
-
-const hanken = Hanken_Grotesk({
-  subsets: ["latin"],
-  weight: ["400", "500", "600"],
-  variable: "--font-hanken",
+  style: ["italic"],
+  variable: "--font-instrument",
   display: "swap",
 });
 
@@ -62,68 +54,67 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   }
 
   return (
-    <html lang="en" className={`${poppins.variable} ${dmSerif.variable} ${hanken.variable}`}>
-      <body className="min-h-screen">
+    <html lang="en" className={`${inter.variable} ${instrument.variable}`}>
+      <body style={{ background: "#000", color: "#fff" }} className="min-h-screen">
+        <div className="grain" aria-hidden />
         <div className="grid min-h-screen md:grid-cols-[256px_minmax(0,1fr)]">
-          <aside className="flex flex-col bg-rail text-rail-ink md:sticky md:top-0 md:h-screen">
-            <div className="px-5 pt-5 pb-5">
-              <Link href="/" className="text-rail-ink">
-                <Wordmark onDark />
+          <aside className="flex flex-col border-b border-border-soft md:sticky md:top-0 md:h-screen md:border-r md:border-b-0">
+            <div className="appear appear--scale d-1 px-5 pt-6 pb-5">
+              <Link href="/" className="inline-block">
+                <Wordmark />
               </Link>
             </div>
 
             <nav className="flex flex-col gap-2 px-5">
-              <Link href="/" className="btn btn-primary justify-between">
+              <Link href="/" className="btn btn-solid appear appear--soft d-2 justify-between">
                 New rehearsal <span aria-hidden>→</span>
               </Link>
-              <Link href="/from-profile" className="btn btn-rail justify-between">
+              <Link href="/from-profile" className="btn btn-ghost appear appear--soft d-3 justify-between">
                 From a profile <span aria-hidden>→</span>
               </Link>
             </nav>
 
-            <div className="mt-8 flex min-h-0 flex-1 flex-col px-5">
+            <div className="appear appear--soft d-4 mt-8 flex min-h-0 flex-1 flex-col px-5">
               <div className="flex items-baseline justify-between">
-                <p className="label text-rail-muted">Past calls</p>
-                <Link href="/calls" className="label text-rail-muted hover:text-rail-ink">
+                <p className="label text-muted">Past calls</p>
+                <Link href="/calls" className="label text-muted transition-colors hover:text-text">
                   All
                 </Link>
               </div>
               {recent.length === 0 ? (
-                <p className="mt-3 text-[13px] leading-relaxed text-rail-muted">
-                  Your first rehearsal shows up here.
-                </p>
+                <p className="mt-3 text-[13px] leading-relaxed text-muted">Your first rehearsal shows up here.</p>
               ) : (
                 <ul className="mt-2 -mx-2 overflow-y-auto">
                   {recent.map((a) => (
                     <li key={a.id}>
                       <Link
                         href={`/attempt/${encodeURIComponent(a.id)}`}
-                        className="flex items-start gap-2.5 px-2 py-2 transition-colors hover:bg-rail-2"
+                        className="flex items-start gap-2.5 rounded-md px-2 py-2 transition-colors hover:bg-panel-2"
                       >
                         <span
                           aria-hidden
-                          className={`mt-1.5 size-2 shrink-0 ${
+                          className={`mt-1.5 size-2 shrink-0 rounded-full ${
                             a.disposition === "unscored"
-                              ? "ring-1 ring-rail-muted"
-                              : a.disputed
-                                ? "bg-no"
-                                : a.itemsWithEvidence === a.itemsTotal
-                                  ? "bg-mark"
-                                  : "bg-rail-ink"
+                              ? "ring-1 ring-muted"
+                              : a.itemsWithEvidence === a.itemsTotal
+                                ? "bg-text"
+                                : a.itemsWithEvidence === 0
+                                  ? "ring-1 ring-text"
+                                  : "bg-muted"
                           }`}
                         />
                         <span className="min-w-0 flex-1">
-                          <span className="block truncate text-[13px] font-medium text-rail-ink">
+                          <span className="block truncate text-[13px] font-medium text-text">
                             {names.get(a.personaId) ?? a.personaId}
                           </span>
-                          <span className="tnum block text-[12px] text-rail-muted">
+                          <span className="tnum block text-[12px] text-muted">
                             {a.disposition === "unscored"
                               ? "not graded"
                               : `${a.itemsWithEvidence} of ${a.itemsTotal} landed`}
                             {a.disputed ? " · disputed" : ""}
                           </span>
                         </span>
-                        <span className="tnum text-[12px] text-rail-muted">{ago(a.createdAt)}</span>
+                        <span className="tnum text-[12px] text-faint">{ago(a.createdAt)}</span>
                       </Link>
                     </li>
                   ))}
@@ -131,9 +122,9 @@ export default async function RootLayout({ children }: { children: React.ReactNo
               )}
             </div>
 
-            <div className="border-t border-rail-rule px-5 py-4">
-              <p className="flex items-center gap-2 text-[12px] text-rail-muted">
-                <span aria-hidden className={`size-2 ${live ? "bg-mark" : "ring-1 ring-rail-muted"}`} />
+            <div className="border-t border-border-soft px-5 py-4">
+              <p className="flex items-center gap-2 text-[12px] text-muted">
+                <span aria-hidden className={`size-2 rounded-full ${live ? "bg-text" : "ring-1 ring-muted"}`} />
                 {live ? "Your phone can ring" : "Nothing will ring"}
               </p>
             </div>
