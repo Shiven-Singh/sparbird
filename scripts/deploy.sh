@@ -45,9 +45,13 @@ done
 echo
 
 echo "deploying"
+# --set-env-vars replaces the whole environment, so everything the service needs is listed
+# here. The session secret lives in Secret Manager: it must outlive a revision, or every
+# signed-in person is signed out by the next deploy.
 gcloud run deploy "$SERVICE" --project "$PROJECT" --region "$REGION" --image "$IMAGE" \
   --allow-unauthenticated --memory 512Mi --cpu 1 --timeout 300 --max-instances 3 \
-  --set-env-vars "NODE_ENV=production,SPARBIRD_EPHEMERAL=1,SPARBIRD_SEED=1" --quiet
+  --set-env-vars "NODE_ENV=production,SPARBIRD_EPHEMERAL=1,SPARBIRD_SEED=1" \
+  --set-secrets "SPARBIRD_SECRET=sparbird-session-secret:latest" --quiet
 
 URL="$(gcloud run services describe "$SERVICE" --project "$PROJECT" --region "$REGION" --format='value(status.url)')"
 echo "live: $URL"

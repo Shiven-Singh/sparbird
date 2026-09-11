@@ -136,6 +136,10 @@ That enables the APIs, builds the [Dockerfile](Dockerfile) on Cloud Build, and r
 service called `sparbird`. Run it again to ship a new version. The container keeps history in
 memory and scores the recorded calls once at boot, so the page is never empty.
 
+`SPARBIRD_SECRET` signs the session cookie. Set it to any long random string wherever the app
+runs, or everyone is signed out whenever the process restarts. On Cloud Run it comes from Secret
+Manager and the deploy script attaches it.
+
 Any host that runs a container works the same way. Set `SPARBIRD_EPHEMERAL=1` wherever the disk
 does not survive a restart.
 
