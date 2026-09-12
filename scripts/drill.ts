@@ -6,7 +6,10 @@
  *
  * With SPARBIRD_LIVE unset this prints the task that would be spoken and replays a recorded
  * call. With it set, the destination is shown masked and nothing is dialled until you type yes.
+ * Either way .env is read first, so the settings the app uses are the settings this uses.
  */
+
+import "./env";
 
 import { createInterface } from "node:readline/promises";
 import { isLive, previewDrill, runDrill } from "../src/lib/calle";
@@ -54,6 +57,18 @@ async function main(): Promise<void> {
   console.log(line("="));
   console.log(`Mode        : ${preview.live ? "LIVE, this will ring a phone" : "dry run, replaying a recorded call"}`);
   console.log(`Destination : ${preview.destinationMasked}`);
+  if (!preview.live) {
+    const why = !process.env.SPARBIRD_LIVE
+      ? "SPARBIRD_LIVE is not set"
+      : process.env.SPARBIRD_LIVE !== "1"
+        ? `SPARBIRD_LIVE is "${process.env.SPARBIRD_LIVE}", which is not "1"`
+        : "live calling is off";
+    const missing = [
+      !process.env.OWNER_E164?.trim() ? "OWNER_E164 is not set" : null,
+      !process.env.CALLE_API_KEY?.trim() ? "CALLE_API_KEY is not set" : null,
+    ].filter(Boolean);
+    console.log(`Why not live: ${[why, ...missing].join("; ")}`);
+  }
   console.log(`Length cap  : ${preview.maxMinutes} minutes`);
   console.log(`Rubric      : ${spec.rubric.map((r) => `${r.id} (${r.weight})`).join(", ")}`);
 

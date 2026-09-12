@@ -31,12 +31,52 @@ export class SelfDialViolation extends Error {
 
 export class CallePlacementError extends Error {
   readonly cause?: unknown;
+  /** CALL-E's own failure code, when it gave one: unsupported_region, insufficient_balance, ... */
+  readonly code?: string;
   constructor(message: string, cause?: unknown) {
     super(message);
     this.name = "CallePlacementError";
     this.cause = cause;
+    this.code = codeOf(cause);
   }
 }
+
+/** What CALL-E actually said, dug out of whatever the SDK threw. */
+function explain(cause: unknown): string {
+  if (cause && typeof cause === "object") {
+    const e = cause as { code?: unknown; message?: unknown; status?: unknown; name?: unknown };
+    const parts: string[] = [];
+    if (typeof e.message === "string" && e.message) parts.push(e.message);
+    const bracket: string[] = [];
+    if (typeof e.code === "string" && e.code) bracket.push(e.code);
+    if (typeof e.status === "number") bracket.push(`HTTP ${e.status}`);
+    if (bracket.length) parts.push(`(${bracket.join(", ")})`);
+    if (parts.length) return parts.join(" ");
+    if (typeof e.name === "string" && e.name) return e.name;
+  }
+  return cause instanceof Error ? cause.message : String(cause);
+}
+
+function codeOf(cause: unknown): string | undefined {
+  if (cause && typeof cause === "object") {
+    const code = (cause as { code?: unknown }).code;
+    if (typeof code === "string" && code) return code;
+  }
+  return undefined;
+}
+
+/** Plain-words advice for the failures a person can actually do something about. */
+const REMEDY: Record<string, string> = {
+  unsupported_region:
+    "CALL-E will not dial that country. Check the number's country code against the regions your CALL-E account can reach.",
+  insufficient_balance: "The CALL-E account is out of credit. Top it up and try again.",
+  unauthorized: "CALL-E rejected the API key. Check CALLE_API_KEY.",
+  forbidden: "This CALL-E account is not allowed to place this call.",
+  rate_limit_exceeded: "CALL-E is rate limiting this account. Wait a moment and try again.",
+  invalid_phone: "CALL-E could not read that number. It must be E.164: a plus, a country code, no spaces.",
+  invalid_recipient: "CALL-E rejected the recipient. Check the number is one this account may call.",
+  recipient_blocked: "That number is blocked at CALL-E's end.",
+};
 
 export function isLive(): boolean {
   return process.env.SPARBIRD_LIVE === "1";
@@ -296,10 +336,18 @@ export async function runDrill(spec: PersonaSpec, options: RunDrillOptions = {})
     const outcome = normalise(call as unknown as Record<string, unknown>, spec.id, true);
     return settings ? { ...outcome, settings } : outcome;
   } catch (error) {
-    throw new CallePlacementError(
-      "CALL-E did not return a completed call. Nothing has been scored. " +
-        "If the phone rang, the call still happened and may still be charged.",
-      error,
-    );
+    const code = codeOf(error);
+    const remedy = code ? REMEDY[code] : undefined;
+    // The reason belongs where the person pressing the button can read it. Swallowing it
+    // behind "something went wrong" is how you end up staring at a phone that never rings.
+    const message = [
+      `CALL-E would not place the call: ${explain(error)}.`,
+      remedy,
+      "Nothing has been scored. If the phone rang, the call still happened and may still be charged.",
+    ]
+      .filter(Boolean)
+      .join(" ");
+    console.error("[sparbird] live call failed", { code, detail: explain(error) });
+    throw new CallePlacementError(message, error);
   }
 }
