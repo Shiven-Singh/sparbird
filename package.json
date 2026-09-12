@@ -16,7 +16,8 @@
     "typecheck": "tsc --noEmit",
     "drill": "tsx scripts/drill.ts",
     "e2e:dry": "tsx scripts/dry-run.ts",
-    "test": "vitest run"
+    "test": "vitest run",
+    "preflight": "tsx scripts/preflight.ts"
   },
   "dependencies": {
     "@call-e/calle": "^0.7.0",

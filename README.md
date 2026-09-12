@@ -34,6 +34,7 @@ pnpm e2e:dry        # replays all of them and checks the scoring still holds
 
 | | |
 | --- | --- |
+| `pnpm preflight` | can this machine place a call right now, and if not, what is in the way |
 | `pnpm dev` | the app, on port 3000 |
 | `pnpm build && pnpm start` | the production build |
 | `pnpm e2e:dry` | replay every recorded call, no key and no network |
