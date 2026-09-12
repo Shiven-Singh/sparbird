@@ -1,14 +1,15 @@
 # Sparbird
 
-**Walk in having already had the conversation.**
+**Practise the hard call by actually having it.**
 
 You get one shot at the meeting that matters. Sparbird gives you a second one, first.
 
-Pick the kind of person you are about to face. Your phone rings, they pick up, and they push
-back the way they will on the day. Five minutes later you know exactly which line lost them,
-because it is quoted back to you.
+Pick the kind of person you have to win over. Sparbird rings your phone and plays them: they
+interrupt, they push back, they are not easily impressed. When you hang up, every line you said
+is marked with what worked and what cost you.
 
-Sparbird only ever calls you. There is no contact list, and no way to point it at anybody else.
+It rings one number, the one saved on your own account. There is no list to upload and no way to
+dial anybody else.
 
 **Live:** https://sparbird-nsi2jfswta-uc.a.run.app (Cloud Run, scales to zero, so the first load takes a moment). The public copy replays recorded calls and cannot ring anyone. To hear your own phone ring, run it on your machine.
 
@@ -16,27 +17,42 @@ Sparbird only ever calls you. There is no contact list, and no way to point it a
 
 ## Try it without spending anything
 
+Node 22 or newer, and pnpm.
+
 ```bash
 pnpm install
 cp .env.example .env
-pnpm e2e:dry
+pnpm dev            # http://localhost:3000
 ```
 
-That replays real calls that already happened, scored the same way a live one is. No key, no
-network, no phone ringing. Then `pnpm dev` and open http://localhost:3000 to see it as a person
-would use it.
+Nothing rings. Every caller replays a real call that already happened, scored exactly the way a
+live one is. To watch that happen in a terminal instead of a browser:
 
-## When you want the phone to ring
-
-Put three things in `.env`:
+```bash
+pnpm e2e:dry        # replays all of them and checks the scoring still holds
+```
 
 | | |
 | --- | --- |
-| `CALLE_API_KEY` | your key from the CALL-E dashboard |
-| `OWNER_E164` | your own phone, like `+14155550123` |
-| `SPARBIRD_LIVE` | `1`, and only when you mean it |
+| `pnpm dev` | the app, on port 3000 |
+| `pnpm build && pnpm start` | the production build |
+| `pnpm e2e:dry` | replay every recorded call, no key and no network |
+| `pnpm drill <persona-id>` | take one call from the terminal |
+| `pnpm typecheck` | tsc, no emit |
 
-Then take a call from the app, or from a terminal:
+## When you want the phone to ring
+
+Three things have to be true, and the app tells you which one is missing at `/settings`.
+
+**Your number** is not a setting on the server, it is on your account. Sign up at `/signup`, or
+add it later at `/settings`. An account without one cannot place a call.
+
+**A CALL-E key**, in `.env` as `CALLE_API_KEY`, from the CALL-E dashboard.
+
+**`SPARBIRD_LIVE=1`** in `.env`, and only when you mean it. Anything else, including empty, runs
+on recorded calls so that nobody is rung by accident.
+
+Then press the button on any caller, or from a terminal:
 
 ```bash
 pnpm drill first-principles-investor
@@ -44,10 +60,17 @@ pnpm drill first-principles-investor
 
 It shows you who is calling and which number will ring, and waits for you to say yes.
 
+### Pinning the whole install to one phone
+
+Set `OWNER_E164` to a number in E.164 form and that phone becomes the only phone this copy will
+ever dial, whoever is signed in and whatever they saved on their account. That is what makes a
+shared or public deployment harmless. Leave it unset and each account rings its own number.
+
 ## What it will not do
 
-It will not call anyone but you. The number in `OWNER_E164` is the only destination, and a
-drill that somehow resolves to a different one stops before the call is built.
+It will not call anyone but you. The destination is the number on your own account, or
+`OWNER_E164` where that is set, and a drill that somehow resolves to a different one stops before
+the call is built.
 
 It will not pretend to be a real person. Every call opens by saying out loud that it is a
 rehearsal, and that line cannot be edited or removed.
@@ -96,6 +119,22 @@ There is a third thing worth knowing. The call service returns its own summary o
 went, and sometimes that summary does not match the recording. When the two disagree, Sparbird
 keeps the recording, says so on the page, and scores from what was actually said.
 
+## Where your calls are kept
+
+SQLite, at `data/sparbird.db`, created the first time the app runs. Three tables: `attempts`
+(every call with its transcript and its marking), `users`, and `enquiries` from the contact page.
+Point it somewhere else with `SPARBIRD_DB=/some/path.db`. It is gitignored.
+
+```bash
+sqlite3 data/sparbird.db ".tables"
+sqlite3 data/sparbird.db "SELECT persona_id, points, max_points FROM attempts;"
+```
+
+Set `SPARBIRD_EPHEMERAL=1` and there is no file at all: everything is held in memory and is gone
+when the process stops. That is on by default on Cloud Run, Vercel and Lambda, which is why the
+public copy forgets accounts between restarts. A deployment meant to remember people needs a
+database that outlives the container.
+
 ## How it is put together
 
 One Node process. The pages, the API and the engine all run in it, which is why the same code
@@ -103,10 +142,11 @@ runs from a terminal with no server at all.
 
 ```
 BROWSER   /  ·  /from-profile  ·  /drill/[id]  ·  /attempt/[id]  ·  /calls
+          /pricing  ·  /signup  ·  /signin  ·  /settings  ·  /contact
           server-rendered pages; one small client component starts a call
                                    │
-SERVER    POST /api/drill          │          POST /api/persona
-          (place and score)        ▼          (read a profile)
+SERVER    POST /api/drill  ·  /api/auth  ·  /api/account  ·  /api/persona  ·  /api/contact
+          (place and score)        ▼          (accounts, personas, enquiries)
           ┌──────────────────────────────────────────────────────┐
           │  THE ENGINE, src/lib, plain TypeScript               │
           │  profile.ts   what they wrote → traits, with quotes  │
@@ -114,8 +154,8 @@ SERVER    POST /api/drill          │          POST /api/persona
           │  calle.ts     your number only; fixture unless LIVE  │
           │  score.ts     timings, rubric, does the summary      │
           │               match the recording                    │
-          │  db.ts        SQLite, or memory when the disk will   │
-          │               not survive                            │
+          │  db.ts        SQLite at data/sparbird.db, or memory  │
+          │               where the disk will not survive         │
           └──────────────────────────────────────────────────────┘
                                    │
 OUTSIDE   CALL-E (only for a live call)   ·   an LLM (only if you turn the judge on)
@@ -146,6 +186,7 @@ does not survive a restart.
 ## What is in here
 
 ```
+data/sparbird.db     your calls, accounts and enquiries (gitignored, created on first run)
 personas/            the people you can practice against
 fixtures/            real calls, recorded, so anything can be tried without spending a call
 src/app/             the app

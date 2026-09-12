@@ -5,13 +5,27 @@ enforced in code rather than promised in prose.
 
 ## It dials one number: yours
 
-`OWNER_E164` is the only destination. `src/lib/calle.ts` validates it as E.164 at startup and
-refuses to build a call whose recipient is anything else. There is no recipient list, no CSV
-import, no contact picker, and no multi-recipient path. A drill that somehow resolves to another
-number throws `SelfDialViolation` before the CALL-E client is constructed.
+A call has exactly one destination, and it is the phone on the account placing it. There is no
+recipient list, no CSV import, no contact picker, and no multi-recipient path: `src/lib/calle.ts`
+sends `recipient` in the singular because there is nowhere else for a second number to go.
 
-This is the reason Sparbird needs no consent flow: the person consenting, the person dialing and
-the person answering are the same person.
+`resolveDialNumber()` in `src/lib/mask.ts` picks it, and validates it as E.164 first. An account
+with no number cannot place a call at all. The compiled task is then checked for that number
+before the CALL-E client is constructed, and a drill that somehow resolves to another one throws
+`SelfDialViolation` rather than dialling.
+
+### Where OWNER_E164 fits, and what it is honest about
+
+`OWNER_E164` is a lock. Where it is set, that phone is the only phone the install will dial,
+whoever is signed in and whatever they saved. Nothing a user types can override it. Any
+deployment more than one person can reach should set it.
+
+Where it is not set, the number is typed by the person who will answer it, and the honest version
+of that is: Sparbird trusts them. Saving one requires confirming out loud that it is your own
+phone, and every call still announces itself in its first line, but a determined person could
+type a number that is not theirs. That is a real gap, not a solved problem. Closing it properly
+means verifying the number by calling it, which is not built yet. Until it is, the lock is the
+control that actually holds, and the disclosure is what protects whoever picks up.
 
 ## Live calls are opt-in twice
 
