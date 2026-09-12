@@ -171,7 +171,16 @@ export function compileTask(spec: PersonaSpec, ownerE164: string, settings?: Cal
   return [
     `Call the trainee at ${ownerE164}.`,
     "",
-    `Open with this line, word for word, before anything else: "${DISCLOSURE}"`,
+    // The line used to go out the moment the call was placed, which meant it was delivered to a
+    // ringing phone and heard by nobody. A disclosure nobody hears is not a disclosure.
+    "Say nothing at all until they speak first. They are answering a ringing phone and will say",
+    "hello or give their name. Wait for that, however long it takes.",
+    "",
+    `Then, before anything else, say this line word for word: "${DISCLOSURE}"`,
+    "",
+    "If they go quiet early on, or say they cannot hear you, say that line again and wait. A bad",
+    "connection at the start is not them being difficult, and the character does not begin until",
+    "you know they can hear you.",
     "",
     `Then play this character for the rest of the call: ${spec.display_name}.`,
     spec.summary ? `In short: ${spec.summary}` : "",
