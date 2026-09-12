@@ -74,6 +74,36 @@ export function resolveOwnerNumber(): string {
   return raw;
 }
 
+/**
+ * Country codes, longest first so +971 wins over +97 and +1 is the last resort.
+ * Not exhaustive: an unknown number keeps whatever region the persona carries.
+ */
+const DIALLING: Array<[string, string]> = [
+  ["880", "BD"], ["852", "HK"], ["971", "AE"], ["977", "NP"], ["353", "IE"],
+  ["91", "IN"], ["92", "PK"], ["94", "LK"], ["44", "GB"], ["61", "AU"],
+  ["49", "DE"], ["33", "FR"], ["81", "JP"], ["65", "SG"], ["27", "ZA"],
+  ["55", "BR"], ["52", "MX"], ["64", "NZ"], ["31", "NL"], ["34", "ES"],
+  ["39", "IT"], ["46", "SE"], ["47", "NO"], ["45", "DK"], ["48", "PL"],
+  ["90", "TR"], ["86", "CN"], ["82", "KR"], ["60", "MY"], ["62", "ID"],
+  ["63", "PH"], ["66", "TH"], ["84", "VN"], ["7", "RU"], ["1", "US"],
+];
+
+/**
+ * The country a number belongs to, for the routing hint CALL-E uses to pick a line.
+ *
+ * This has to follow the destination, not the persona. An American investor calling an Indian
+ * phone is still a call into India, and telling the carrier otherwise earns a 404 and no ring.
+ * The persona's `locale` is untouched: that is how they sound, and it should stay American if
+ * that is who they are.
+ */
+export function regionForNumber(e164: string): string | null {
+  const digits = e164.trim().replace(/^\+/, "");
+  for (const [code, region] of DIALLING) {
+    if (digits.startsWith(code)) return region;
+  }
+  return null;
+}
+
 /** Redacts anything that looks like a phone number in free text before it is stored or logged. */
 export function redactNumbers(text: string): string {
   return text.replace(/\+?\d[\d\s\-().]{7,}\d/g, (match) => maskPhone(match.replace(/[\s\-().]/g, "")));

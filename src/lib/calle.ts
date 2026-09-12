@@ -14,7 +14,7 @@
 import { readFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 import { compileTask, resultSchemaFor } from "./persona";
-import { ConfigError, isE164, maskPhone, resolveDialNumber } from "./mask";
+import { ConfigError, isE164, maskPhone, regionForNumber, resolveDialNumber } from "./mask";
 import type { CallSettings, DrillOutcome, PersonaSpec, TranscriptTurn } from "./types";
 
 const FIXTURE_DIR = join(process.cwd(), "fixtures", "transcripts");
@@ -337,8 +337,10 @@ export async function runDrill(spec: PersonaSpec, options: RunDrillOptions = {})
         // Singular on purpose. There is no multi-recipient path in this app.
         recipient: {
           phone: owner,
+          // How they sound. An American investor should sound American wherever you are.
           locale: spec.voice.locale,
-          region: spec.voice.region,
+          // Where the call is going, which is not the same question. CALL-E routes on this.
+          region: regionForNumber(owner) ?? spec.voice.region,
         },
         resultSchema: resultSchemaFor(spec),
         metadata: {
