@@ -14,7 +14,7 @@
 import { readFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 import { compileTask, resultSchemaFor } from "./persona";
-import { ConfigError, isE164, maskPhone, regionForNumber, resolveDialNumber } from "./mask";
+import { ConfigError, isE164, maskPhone, redactNumbers, regionForNumber, resolveDialNumber } from "./mask";
 import type { CallSettings, DrillOutcome, PersonaSpec, TranscriptTurn } from "./types";
 
 const FIXTURE_DIR = join(process.cwd(), "fixtures", "transcripts");
@@ -175,8 +175,11 @@ export interface DrillPreview {
 }
 
 /**
- * Everything that would be sent, with the destination masked. Building a preview never
- * dials and never needs an API key, so this is safe to render in a UI or print in a terminal.
+ * Everything that would be sent, with every number in it masked.
+ *
+ * The compiled task opens by naming the number to ring, so returning it raw made the page that
+ * displays the task publish the owner's phone to anyone who loaded it. The preview is for reading;
+ * the real number is compiled separately, inside runDrill, and never leaves the server.
  */
 export function previewDrill(spec: PersonaSpec, dialTo?: string, settings?: CallSettings | null): DrillPreview {
   const owner = dialTo?.trim() || lockedNumber() || "";
@@ -184,7 +187,7 @@ export function previewDrill(spec: PersonaSpec, dialTo?: string, settings?: Call
   return {
     personaId: spec.id,
     displayName: spec.display_name,
-    task,
+    task: redactNumbers(task),
     resultSchema: resultSchemaFor(spec),
     destinationMasked: owner ? maskPhone(owner) : "not set",
     live: isLive(),

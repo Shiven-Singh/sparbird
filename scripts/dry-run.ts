@@ -10,7 +10,7 @@
 
 import { listFixtures, loadFixtureOutcome, previewDrill } from "../src/lib/calle";
 import { createJudge } from "../src/lib/judge";
-import { loadPersona } from "../src/lib/persona";
+import { compileTask, loadPersona } from "../src/lib/persona";
 import { headline, scoreDrill } from "../src/lib/score";
 import { toAttemptRecord } from "../src/lib/db";
 
@@ -132,7 +132,15 @@ async function main(): Promise<void> {
   if (!preview.task.includes("simulated practice persona")) {
     failures.push("compiled task is missing the disclosure line");
   }
-  if (!preview.task.includes("+919999999999")) {
+  // The preview is rendered on a page. It must not carry a number that can be dialled.
+  if (preview.task.includes("+919999999999")) {
+    failures.push("preview task leaked the destination number in full");
+  }
+  if (!preview.task.includes("9999")) {
+    failures.push("preview task does not address the owner number at all, even masked");
+  }
+  // The task that is actually sent still has to name the real number.
+  if (!compileTask(spec, "+919999999999").includes("+919999999999")) {
     failures.push("compiled task does not address the owner number");
   }
   if (preview.destinationMasked.includes("9999999999")) {
