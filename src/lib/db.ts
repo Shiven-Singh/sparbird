@@ -51,11 +51,9 @@ export interface UserRecord {
 /** Somebody asking about the Custom plan. Kept so the ask does not vanish into a mail client. */
 export interface EnquiryRecord {
   id: string;
-  name: string;
   email: string;
-  company: string;
-  seats: string;
-  message: string;
+  /** What they need. Everything else about them can be asked in the reply. */
+  requirement: string;
   createdAt: string;
 }
 
@@ -155,11 +153,8 @@ interface UserRow {
 
 interface EnquiryRow {
   id: string;
-  name: string;
   email: string;
-  company: string;
-  seats: string;
-  message: string;
+  requirement: string;
   created_at: string;
 }
 
@@ -243,11 +238,8 @@ class SqliteStore implements Store {
       );
       CREATE TABLE IF NOT EXISTS enquiries (
         id TEXT PRIMARY KEY,
-        name TEXT NOT NULL,
         email TEXT NOT NULL,
-        company TEXT NOT NULL,
-        seats TEXT NOT NULL,
-        message TEXT NOT NULL,
+        requirement TEXT NOT NULL,
         created_at TEXT NOT NULL
       );
     `);
@@ -263,6 +255,22 @@ class SqliteStore implements Store {
       this.db.exec("ALTER TABLE users ADD COLUMN phone TEXT");
     } catch {
       // Already there.
+    }
+    try {
+      const columns = this.db.prepare("PRAGMA table_info(enquiries)").all() as Array<{ name: string }>;
+      if (columns.some((c) => c.name === "name")) {
+        this.db.exec("DROP TABLE enquiries");
+        this.db.exec(`
+          CREATE TABLE enquiries (
+            id TEXT PRIMARY KEY,
+            email TEXT NOT NULL,
+            requirement TEXT NOT NULL,
+            created_at TEXT NOT NULL
+          );
+        `);
+      }
+    } catch {
+      // No such table, which is the usual case.
     }
   }
 
@@ -324,19 +332,16 @@ class SqliteStore implements Store {
 
   saveEnquiry(enquiry: EnquiryRecord): void {
     this.db
-      .prepare("INSERT INTO enquiries (id, name, email, company, seats, message, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)")
-      .run(enquiry.id, enquiry.name, enquiry.email, enquiry.company, enquiry.seats, enquiry.message, enquiry.createdAt);
+      .prepare("INSERT INTO enquiries (id, email, requirement, created_at) VALUES (?, ?, ?, ?)")
+      .run(enquiry.id, enquiry.email, enquiry.requirement, enquiry.createdAt);
   }
 
   listEnquiries(): EnquiryRecord[] {
     const rows = this.db.prepare("SELECT * FROM enquiries ORDER BY created_at DESC").all() as EnquiryRow[];
     return rows.map((r) => ({
       id: r.id,
-      name: r.name,
       email: r.email,
-      company: r.company,
-      seats: r.seats,
-      message: r.message,
+      requirement: r.requirement,
       createdAt: r.created_at,
     }));
   }

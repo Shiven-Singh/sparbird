@@ -35,7 +35,7 @@ export default async function ContactPage() {
       </header>
 
       <div className="appear appear--soft d-2 mt-8 grid gap-4 lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]">
-        <ContactForm defaultEmail={user?.email} defaultName={user?.name} />
+        <ContactForm defaultEmail={user?.email} />
 
         <div className="panel p-6">
           <p className="label text-muted">Asked most often</p>

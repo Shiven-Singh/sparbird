@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 
-export function ContactForm({ defaultEmail, defaultName }: { defaultEmail?: string; defaultName?: string }) {
+export function ContactForm({ defaultEmail }: { defaultEmail?: string }) {
   const [busy, setBusy] = useState(false);
   const [sent, setSent] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -12,9 +12,6 @@ export function ContactForm({ defaultEmail, defaultName }: { defaultEmail?: stri
       <div className="panel panel-good p-6">
         <p className="text-[17px] leading-snug tracking-[-0.02em] text-text">
           That is with us. Someone will write back to you within a working day.
-        </p>
-        <p className="mt-2 text-[14px] leading-relaxed text-muted">
-          If it is urgent, say so in a second message and it will go to the top.
         </p>
         <button type="button" onClick={() => setSent(false)} className="btn btn-ghost mt-5">
           Send another
@@ -35,13 +32,7 @@ export function ContactForm({ defaultEmail, defaultName }: { defaultEmail?: stri
           const response = await fetch("/api/contact", {
             method: "POST",
             headers: { "content-type": "application/json" },
-            body: JSON.stringify({
-              name: form.get("name"),
-              email: form.get("email"),
-              company: form.get("company"),
-              seats: form.get("seats"),
-              message: form.get("message"),
-            }),
+            body: JSON.stringify({ email: form.get("email"), requirement: form.get("requirement") }),
           });
           const data = await response.json();
           if (!response.ok) throw new Error(data.error ?? "That could not be sent.");
@@ -53,46 +44,31 @@ export function ContactForm({ defaultEmail, defaultName }: { defaultEmail?: stri
         }
       }}
     >
-      <div className="grid gap-4 sm:grid-cols-2">
-        <div>
-          <label htmlFor="name" className="label text-muted">
-            Your name
-          </label>
-          <input id="name" name="name" required defaultValue={defaultName} autoComplete="name" className="field mt-2" />
-        </div>
-        <div>
-          <label htmlFor="email" className="label text-muted">
-            Where to reply
-          </label>
-          <input id="email" name="email" type="email" required defaultValue={defaultEmail} autoComplete="email" className="field mt-2" />
-        </div>
-        <div>
-          <label htmlFor="company" className="label text-muted">
-            Company
-          </label>
-          <input id="company" name="company" autoComplete="organization" className="field mt-2" />
-        </div>
-        <div>
-          <label htmlFor="seats" className="label text-muted">
-            How many people
-          </label>
-          <input id="seats" name="seats" inputMode="numeric" placeholder="40" className="field mt-2" />
-        </div>
-      </div>
+      <label htmlFor="email" className="label text-muted">
+        Where to reply
+      </label>
+      <input
+        id="email"
+        name="email"
+        type="email"
+        required
+        defaultValue={defaultEmail}
+        autoComplete="email"
+        placeholder="you@company.com"
+        className="field mt-2"
+      />
 
-      <div className="mt-4">
-        <label htmlFor="message" className="label text-muted">
-          What are you trying to do
-        </label>
-        <textarea
-          id="message"
-          name="message"
-          required
-          rows={5}
-          placeholder="We put thirty new reps through onboarding a quarter and most of them have never been hung up on."
-          className="field mt-2 resize-y"
-        />
-      </div>
+      <label htmlFor="requirement" className="label mt-5 block text-muted">
+        What you need
+      </label>
+      <textarea
+        id="requirement"
+        name="requirement"
+        required
+        rows={6}
+        placeholder="Thirty new reps a quarter, most of whom have never been hung up on. We want them taking calls in week one."
+        className="field mt-2 resize-y"
+      />
 
       {error ? <p className="mt-3 text-[13px] text-bad">{error}</p> : null}
 
