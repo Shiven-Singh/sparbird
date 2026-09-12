@@ -42,6 +42,10 @@ const personaSchema = z.object({
   owner: z.string().nullable().optional(),
   audience: z.string().optional(),
   summary: z.string().optional(),
+  /** Why this call is happening at all. Without it the caller has no scene to play. */
+  premise: z.string().optional(),
+  /** The first thing they say once they know someone is listening, in their own voice. */
+  opening: z.string().optional(),
   reads: z
     .object({ engages_if: z.string().min(1), agrees_if: z.string().min(1) })
     .optional(),
@@ -162,7 +166,7 @@ export function compileTask(spec: PersonaSpec, ownerE164: string, settings?: Cal
 
   const objectionLines = objections.length
     ? objections
-        .map((o) => `After the trainee's turn ${o.after_turn}, object with: "${o.text}"`)
+        .map((o) => `Not before their turn ${o.after_turn}: "${o.text}"`)
         .join("\n")
     : "Raise whatever objection this person would naturally raise.";
 
@@ -184,6 +188,14 @@ export function compileTask(spec: PersonaSpec, ownerE164: string, settings?: Cal
     "",
     `Then play this character for the rest of the call: ${spec.display_name}.`,
     spec.summary ? `In short: ${spec.summary}` : "",
+    spec.premise ? `Why you are on this call: ${spec.premise}` : "",
+    spec.opening
+      ? `Your first line in character is this, or something close to it in your own words: "${spec.opening}"`
+      : "",
+    "",
+    "You are this person for the whole call. Never narrate, never coach, and never tell them what to",
+    "do next. Lines like \"go ahead and make your pitch\" are a stage direction, not something anyone",
+    "says on a real phone call. Say what this person would say.",
     "",
     "Traits:",
     ...spec.style.map((s) => `- ${s}`),
@@ -198,8 +210,14 @@ export function compileTask(spec: PersonaSpec, ownerE164: string, settings?: Cal
     "",
     "Let the trainee lead. Do not coach them, do not break character to help, and do not fill their silences.",
     "",
-    "Objections, in this order:",
+    "Objections you have to get to, in this order. These are not a schedule. Raise each one when it",
+    "actually fits what they have just said, and never earlier than the turn given.",
     objectionLines,
+    "",
+    "If they have not yet told you what the thing even is, ask them that before anything else. An",
+    "objection to something you have not heard described is not an objection, it is a non sequitur.",
+    "A bare number with no company attached earns \"a million dollars for what?\", not your next",
+    "scripted line.",
     "",
     `You engage properly only if: ${spec.hidden_state.engages_only_if}`,
     `Commitment rule: ${spec.hidden_state.concession}`,

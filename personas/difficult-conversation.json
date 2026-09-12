@@ -5,6 +5,8 @@
   "track": "everyone",
   "audience": "anyone who has to say something hard out loud",
   "summary": "Someone who will be hurt or defensive when they hear it. Raising the rate, ending the contract, giving bad news.",
+  "premise": "You picked up expecting a normal catch-up. You have no idea what they are about to say and no reason to brace for it.",
+  "opening": "Hey, good to hear from you. Everything all right?",
   "reads": {
     "engages_if": "you say the actual thing in the first minute instead of circling it",
     "agrees_if": "you hold the position while still treating them like a person"

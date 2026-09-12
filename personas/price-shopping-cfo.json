@@ -5,6 +5,8 @@
   "track": "sales",
   "audience": "sales reps selling into finance",
   "summary": "Polite, unhurried, and anchored on a cheaper competitor. Will not discuss value until price is named.",
+  "premise": "This rep has been chasing you for three weeks. You have a cheaper quote from their competitor open on your screen.",
+  "opening": "You've got ten minutes. Start with your pricing, because that's what this comes down to.",
   "reads": {
     "engages_if": "you move them off price and onto what their current way costs",
     "agrees_if": "you can say what the status quo is costing them today"

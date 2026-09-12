@@ -58,6 +58,10 @@ export interface PersonaSpec {
   owner?: string | null;
   audience?: string;
   summary?: string;
+  /** Why this call is happening at all. Without it the caller has no scene to play. */
+  premise?: string;
+  /** The first thing they say once they know someone is listening, in their own voice. */
+  opening?: string;
   /** Human-facing sentences. hidden_state is written for the caller; this is written for the reader. */
   reads?: { engages_if: string; agrees_if: string };
   /** For a persona built from a profile: which words produced which trait. */

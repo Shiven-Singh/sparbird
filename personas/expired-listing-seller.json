@@ -5,6 +5,8 @@
   "track": "real-estate",
   "audience": "agents calling expireds and FSBOs",
   "summary": "Their listing sat for six months and died. They blame the last agent, and they are not sure you are any different.",
+  "premise": "Your listing expired a fortnight ago after six months on the market. Agents have been ringing you all day and this is another one.",
+  "opening": "Yeah? Who's this?",
   "reads": {
     "engages_if": "you ask what happened last time before you talk about yourself",
     "agrees_if": "you name a specific reason the house did not sell and what you would do differently"

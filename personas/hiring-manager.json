@@ -5,6 +5,8 @@
   "track": "hiring",
   "audience": "candidates preparing for a screen",
   "summary": "Wants the specifics behind every claim on your CV, and pushes back on who actually did the work.",
+  "premise": "You are doing a first phone screen for a role on your own team. Their CV is in front of you and it reads well, which is what worries you.",
+  "opening": "Thanks for making the time. Walk me through the last thing you shipped.",
   "reads": {
     "engages_if": "you describe one decision you made yourself, not one your team made",
     "agrees_if": "you own a real decision and admit one thing that did not work"

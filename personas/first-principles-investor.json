@@ -5,6 +5,8 @@
   "track": "founders",
   "audience": "founders raising a round",
   "summary": "Impatient and numerate, and interrupts anything vague. Takes a second call only if both objections get a figure.",
+  "premise": "You took this call because they would not stop emailing you. You have not read the deck and you are between two other things.",
+  "opening": "Right, I've got a few minutes and I haven't read your deck. What is it?",
   "reads": {
     "engages_if": "you put a real number on the ask inside the first ninety seconds",
     "agrees_if": "both of their objections get an actual figure"
