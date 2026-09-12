@@ -67,6 +67,18 @@ async function main(): Promise<void> {
     );
   }
 
+  // 3b. The session secret. Not about calls, but a signed-in account is how you are allowed
+  //     to place one when the install is locked, and losing the session looks like a bug.
+  if (!process.env.SPARBIRD_SECRET?.trim()) {
+    say(
+      "note",
+      "Session secret",
+      "SPARBIRD_SECRET is not set, so signing in stops working every time the server restarts. Put any long random string in .env.",
+    );
+  } else {
+    say("ok", "Session secret", "Set, so sessions survive a restart.");
+  }
+
   // 4. The outbound line. This is the one that actually catches a stuck task, and the only
   //    way to ask is to try to start something. The number below is in country code 999,
   //    which the ITU has never assigned, so it cannot reach a person even if it is accepted.

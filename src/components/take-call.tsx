@@ -15,7 +15,7 @@ interface Props {
    * themselves. Anything they cannot fix, like the key or the live flag, is not their problem
    * to solve here and the recorded call runs instead.
    */
-  needsNumber?: "signin" | "phone" | null;
+  needsNumber?: "signin" | "phone" | "locked" | null;
 }
 
 export function TakeCall({ personaId, live, destinationMasked, tone, intent, needsNumber }: Props) {
@@ -88,7 +88,12 @@ export function TakeCall({ personaId, live, destinationMasked, tone, intent, nee
       </button>
       {!live && needsNumber ? (
         <p className="mt-3 max-w-xs text-[13px] leading-relaxed text-text-2">
-          {needsNumber === "signin" ? (
+          {needsNumber === "locked" ? (
+            <>
+              This copy of Sparbird is set up to ring one particular phone, so it plays a recorded
+              call for everyone else. It scores exactly the way a real one does.
+            </>
+          ) : needsNumber === "signin" ? (
             <>
               To be rung for real,{" "}
               <Link href="/signin" className="text-text underline decoration-dotted underline-offset-4">

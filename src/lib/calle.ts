@@ -110,6 +110,20 @@ export function lockedNumber(): string | null {
   return process.env.OWNER_E164?.trim() || null;
 }
 
+/**
+ * Whether this account is allowed to make a phone ring here.
+ *
+ * With no lock, everyone rings their own number and there is nothing to police. With a lock, the
+ * install has exactly one phone and it belongs to somebody: only the account carrying that number
+ * may dial it. Otherwise a public URL would let any visitor ring a stranger's phone at three in
+ * the morning and spend their credits doing it.
+ */
+export function mayCallLive(accountPhone: string | null | undefined): boolean {
+  const locked = lockedNumber();
+  if (!locked) return true;
+  return accountPhone?.trim() === locked;
+}
+
 export interface LiveReadiness {
   /** True when pressing the button would actually make a phone ring. */
   ready: boolean;
@@ -136,6 +150,7 @@ export function liveReadiness(accountPhone: string | null | undefined): LiveRead
 
   const missing: string[] = [];
   if (!usable) missing.push(number ? "phone-invalid" : "phone-missing");
+  else if (!mayCallLive(accountPhone)) missing.push("not-your-line");
   if (!hasKey) missing.push("key");
   if (!liveFlag) missing.push("flag");
 
@@ -277,6 +292,11 @@ export interface RunDrillOptions {
   settings?: CallSettings | null;
   /** The phone on the account placing this call. Ignored when OWNER_E164 locks the install. */
   accountPhone?: string | null;
+  /**
+   * Set false to replay a recording even where everything is configured to dial. The web route
+   * uses it for visitors who are not entitled to ring the locked phone.
+   */
+  allowLive?: boolean;
 }
 
 export function loadFixtureOutcome(spec: PersonaSpec, fixtureId?: string): DrillOutcome {
@@ -305,7 +325,7 @@ export function loadFixtureOutcome(spec: PersonaSpec, fixtureId?: string): Drill
 export async function runDrill(spec: PersonaSpec, options: RunDrillOptions = {}): Promise<DrillOutcome> {
   const settings = options.settings ?? undefined;
 
-  if (!isLive()) {
+  if (!isLive() || options.allowLive === false) {
     const replay = loadFixtureOutcome(spec, options.fixtureId);
     return settings ? { ...replay, settings } : replay;
   }

@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { currentUser } from "@/lib/auth";
-import { runDrill } from "@/lib/calle";
+import { mayCallLive, runDrill } from "@/lib/calle";
 import { getStore, toAttemptRecord } from "@/lib/db";
 import { createJudge } from "@/lib/judge";
 import { canSee, isIntentKey, isToneKey, listPersonaIds, loadPersona } from "@/lib/persona";
@@ -39,6 +39,8 @@ export async function POST(request: Request) {
       fixtureId: body.fixtureId,
       settings,
       accountPhone: user?.phone ?? null,
+      // A visitor to a shared deployment must not be able to ring the owner's phone.
+      allowLive: mayCallLive(user?.phone ?? null),
       idempotencyKey: `sparbird:${personaId}:${tone}:${intent}:${new Date().toISOString().slice(0, 16)}`,
     });
 

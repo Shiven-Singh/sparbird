@@ -83,7 +83,15 @@ export default async function DrillPage({
             destinationMasked={ready.numberMasked ?? "your phone"}
             tone={tone}
             intent={intent}
-            needsNumber={!user ? "signin" : ready.missing.includes("phone-missing") ? "phone" : null}
+            needsNumber={
+              ready.missing.includes("not-your-line") || (ready.locked && !user)
+                ? "locked"
+                : !user
+                  ? "signin"
+                  : ready.missing.includes("phone-missing")
+                    ? "phone"
+                    : null
+            }
           />
           <p className="max-w-xs text-[12px] leading-relaxed text-muted">
             {live

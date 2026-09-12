@@ -16,6 +16,15 @@ const SESSION_DAYS = 30;
 
 const bootSecret = randomBytes(32).toString("hex");
 
+if (!process.env.SPARBIRD_SECRET?.trim()) {
+  // Worth saying out loud. Without it sessions die with the process, and a dev server that
+  // recompiles looks exactly like a sign-in that silently does not work.
+  console.warn(
+    "[sparbird] SPARBIRD_SECRET is not set, so sessions last only as long as this process. " +
+      "Put any long random string in .env, or signing in will appear to fail after a restart.",
+  );
+}
+
 function secret(): string {
   return process.env.SPARBIRD_SECRET?.trim() || bootSecret;
 }
