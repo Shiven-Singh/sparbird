@@ -26,7 +26,35 @@ export function maskPhone(value: string): string {
 }
 
 /**
- * The one number Sparbird is allowed to dial. Throws rather than defaulting,
+ * The number this call is allowed to ring, and the only one.
+ *
+ * `OWNER_E164` is a lock, not a default: where it is set, that phone is the only phone this
+ * install will ever dial, whoever is signed in. That is how the public demo stays harmless.
+ * Where it is not set, the number saved on the signed-in account is used, and an account with
+ * no number cannot place a call at all.
+ */
+export function resolveDialNumber(accountPhone: string | null | undefined): string {
+  const locked = process.env.OWNER_E164?.trim();
+  if (locked) return resolveOwnerNumber();
+
+  const raw = accountPhone?.trim();
+  if (!raw) {
+    throw new ConfigError(
+      "There is no phone number on this account yet. Sparbird rings your own phone and nobody " +
+        "else's, so it needs to know which one. Add it under Settings.",
+    );
+  }
+  if (!isE164(raw)) {
+    throw new ConfigError(
+      `The number on this account is not a valid E.164 number: ${maskPhone(raw)}. ` +
+        "Use a leading plus, country code, and no spaces or dashes.",
+    );
+  }
+  return raw;
+}
+
+/**
+ * The install-wide lock, when there is one. Throws rather than defaulting,
  * because a wrong default here would mean calling a stranger.
  */
 export function resolveOwnerNumber(): string {

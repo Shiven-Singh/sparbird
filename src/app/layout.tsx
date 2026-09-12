@@ -4,7 +4,7 @@ import Link from "next/link";
 import { Mark, Wordmark } from "@/components/logo";
 import { SignOut } from "@/components/sign-out";
 import { currentUser } from "@/lib/auth";
-import { isLive } from "@/lib/calle";
+import { liveReadiness } from "@/lib/calle";
 import { getStore } from "@/lib/db";
 import { loadPersona } from "@/lib/persona";
 import { ensureSeeded } from "@/lib/seed";
@@ -26,7 +26,7 @@ const instrument = Instrument_Serif({
 
 export const metadata: Metadata = {
   title: "Sparbird",
-  description: "Walk in having already had the conversation.",
+  description: "Pick who you have to win over. Sparbird rings your phone, plays them, and marks what you said.",
 };
 
 export const viewport: Viewport = {
@@ -47,8 +47,8 @@ function ago(iso: string): string {
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   await ensureSeeded();
-  const live = isLive();
   const user = await currentUser();
+  const ready = liveReadiness(user?.phone);
   const store = await getStore();
   const recent = store.list({ viewer: user?.id ?? null }).slice(0, 10);
 
@@ -164,13 +164,18 @@ export default async function RootLayout({ children }: { children: React.ReactNo
               </div>
 
               <div className="panel-head px-5 py-4">
-                <p className="mb-3 flex items-center gap-2 text-[12px] text-muted">
-                  <span aria-hidden className={`dot ${live ? "dot-good" : "dot-none"}`} />
-                  {live ? "Your phone can ring" : "Nothing will ring"}
-                </p>
+                <Link
+                  href={user ? "/settings" : "/signin"}
+                  className="mb-3 flex items-center gap-2 text-[12px] text-muted transition-colors hover:text-text"
+                >
+                  <span aria-hidden className={`dot ${ready.ready ? "dot-good" : "dot-none"}`} />
+                  {ready.ready ? `Calls ring ${ready.numberMasked}` : "Nothing will ring"}
+                </Link>
                 {user ? (
                   <div className="flex items-center justify-between gap-2">
-                    <span className="min-w-0 truncate text-[13px] text-text-2">{user.name}</span>
+                    <Link href="/settings" className="min-w-0 truncate text-[13px] text-text-2 transition-colors hover:text-text">
+                      {user.name}
+                    </Link>
                     <SignOut className="label text-muted transition-colors hover:text-text" />
                   </div>
                 ) : (

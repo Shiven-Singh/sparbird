@@ -58,12 +58,12 @@ export default async function Home({
           Have the call once before it counts
         </span>
         <h1 className="h1 appear appear--soft d-3 mt-5 text-[32px] text-balance text-text md:text-[48px]">
-          Walk in having already had the <em>conversation</em>.
+          Practise the hard call by <em>actually having it</em>.
         </h1>
         <p className="appear appear--soft d-4 mt-4 max-w-[560px] text-[15.5px] leading-[1.55] tracking-[-0.015em] text-muted">
-          Your phone rings, and it is the investor, or the buyer who heard your pitch from someone
-          else last week, or the hiring manager, or the seller whose listing just died. They push
-          back the way they will on the day. Then you find out which of your sentences lost them.
+          Pick the kind of person you have to win over. Sparbird rings your phone and plays them:
+          they interrupt, they push back, they are not easily impressed. When you hang up, every
+          line you said is marked with what worked and what cost you.
         </p>
       </header>
 
@@ -139,8 +139,8 @@ export default async function Home({
       </section>
 
       <p className="appear appear--soft d-7 mt-10 max-w-xl text-[13px] leading-relaxed text-faint">
-        It only ever calls you. There is no contact list and no way to point it at somebody else,
-        and every call opens by saying out loud that it is a rehearsal.
+        It rings one number, the one saved on your own account. There is no list to upload and no
+        way to dial anybody else, and every call opens by saying out loud that it is a rehearsal.
       </p>
     </div>
   );

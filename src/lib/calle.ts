@@ -3,7 +3,8 @@
  *
  * Two guarantees live here, and they are enforced before the API client is even built:
  *
- *   1. The only number this will dial is OWNER_E164.
+ *   1. The only number this will dial is the caller's own: the phone saved on their account,
+ *      or OWNER_E164 where that is set, which locks the whole install to one phone.
  *   2. Nothing dials at all unless SPARBIRD_LIVE is exactly "1".
  *
  * With the flag unset, every call in this module resolves from a recorded fixture, so the
@@ -13,7 +14,7 @@
 import { readFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 import { compileTask, resultSchemaFor } from "./persona";
-import { ConfigError, maskPhone, resolveOwnerNumber } from "./mask";
+import { ConfigError, isE164, maskPhone, resolveDialNumber } from "./mask";
 import type { CallSettings, DrillOutcome, PersonaSpec, TranscriptTurn } from "./types";
 
 const FIXTURE_DIR = join(process.cwd(), "fixtures", "transcripts");
@@ -21,8 +22,8 @@ const FIXTURE_DIR = join(process.cwd(), "fixtures", "transcripts");
 export class SelfDialViolation extends Error {
   constructor(attempted: string) {
     super(
-      `Refused to place a call to ${maskPhone(attempted)}. Sparbird dials only OWNER_E164, ` +
-        "the phone of the person running it. This is a bug, not a configuration option.",
+      `Refused to place a call to ${maskPhone(attempted)}. Sparbird dials only the number on ` +
+        "the caller's own account. This is a bug, not a configuration option.",
     );
     this.name = "SelfDialViolation";
   }
@@ -41,6 +42,50 @@ export function isLive(): boolean {
   return process.env.SPARBIRD_LIVE === "1";
 }
 
+/** Which phone this install is locked to, if any. Set OWNER_E164 to lock it. */
+export function lockedNumber(): string | null {
+  return process.env.OWNER_E164?.trim() || null;
+}
+
+export interface LiveReadiness {
+  /** True when pressing the button would actually make a phone ring. */
+  ready: boolean;
+  liveFlag: boolean;
+  hasKey: boolean;
+  /** The number that would ring, masked. Null when there is not a usable one. */
+  numberMasked: string | null;
+  /** Set when the install is pinned to one phone by OWNER_E164. */
+  locked: boolean;
+  /** What is missing, in the order it should be fixed. */
+  missing: string[];
+}
+
+/**
+ * Everything standing between a person and a ringing phone, answered in one place so the UI
+ * can say which of them it is instead of failing at the moment they press the button.
+ */
+export function liveReadiness(accountPhone: string | null | undefined): LiveReadiness {
+  const locked = lockedNumber();
+  const number = locked ?? (accountPhone?.trim() || null);
+  const usable = number !== null && isE164(number);
+  const liveFlag = isLive();
+  const hasKey = Boolean(process.env.CALLE_API_KEY?.trim());
+
+  const missing: string[] = [];
+  if (!usable) missing.push(number ? "phone-invalid" : "phone-missing");
+  if (!hasKey) missing.push("key");
+  if (!liveFlag) missing.push("flag");
+
+  return {
+    ready: missing.length === 0,
+    liveFlag,
+    hasKey,
+    numberMasked: usable ? maskPhone(number!) : null,
+    locked: locked !== null,
+    missing,
+  };
+}
+
 export interface DrillPreview {
   personaId: string;
   displayName: string;
@@ -55,8 +100,8 @@ export interface DrillPreview {
  * Everything that would be sent, with the destination masked. Building a preview never
  * dials and never needs an API key, so this is safe to render in a UI or print in a terminal.
  */
-export function previewDrill(spec: PersonaSpec, ownerE164?: string, settings?: CallSettings | null): DrillPreview {
-  const owner = ownerE164 ?? (process.env.OWNER_E164?.trim() || "");
+export function previewDrill(spec: PersonaSpec, dialTo?: string, settings?: CallSettings | null): DrillPreview {
+  const owner = dialTo?.trim() || lockedNumber() || "";
   const task = owner ? compileTask(spec, owner, settings) : compileTask(spec, "{OWNER_E164 not set}", settings);
   return {
     personaId: spec.id,
@@ -167,6 +212,8 @@ export interface RunDrillOptions {
   pollIntervalMs?: number;
   /** How the caller should come at the trainee on this call. */
   settings?: CallSettings | null;
+  /** The phone on the account placing this call. Ignored when OWNER_E164 locks the install. */
+  accountPhone?: string | null;
 }
 
 export function loadFixtureOutcome(spec: PersonaSpec, fixtureId?: string): DrillOutcome {
@@ -200,7 +247,7 @@ export async function runDrill(spec: PersonaSpec, options: RunDrillOptions = {})
     return settings ? { ...replay, settings } : replay;
   }
 
-  const owner = resolveOwnerNumber();
+  const owner = resolveDialNumber(options.accountPhone);
 
   const apiKey = process.env.CALLE_API_KEY?.trim();
   if (!apiKey) {

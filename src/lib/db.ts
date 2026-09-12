@@ -40,6 +40,22 @@ export interface UserRecord {
   passwordHash: string;
   /** The plan they picked at signup. Billing is not wired yet; this is intent. */
   plan: string;
+  /**
+   * The number Sparbird rings for this person, E.164. Null until they add it, which is why a
+   * new account cannot take a live call until they visit settings.
+   */
+  phone: string | null;
+  createdAt: string;
+}
+
+/** Somebody asking about the Custom plan. Kept so the ask does not vanish into a mail client. */
+export interface EnquiryRecord {
+  id: string;
+  name: string;
+  email: string;
+  company: string;
+  seats: string;
+  message: string;
   createdAt: string;
 }
 
@@ -55,8 +71,11 @@ interface Store {
   list(options?: ListOptions): AttemptRecord[];
   get(id: string): AttemptRecord | null;
   createUser(user: UserRecord): void;
+  updateUser(user: UserRecord): void;
   getUser(id: string): UserRecord | null;
   getUserByEmail(email: string): UserRecord | null;
+  saveEnquiry(enquiry: EnquiryRecord): void;
+  listEnquiries(): EnquiryRecord[];
 }
 
 function visible(record: AttemptRecord, viewer: string | null | undefined): boolean {
@@ -67,6 +86,7 @@ class MemoryStore implements Store {
   readonly kind = "memory";
   private readonly rows: AttemptRecord[] = [];
   private readonly users = new Map<string, UserRecord>();
+  private readonly enquiries: EnquiryRecord[] = [];
 
   save(record: AttemptRecord): void {
     const at = this.rows.findIndex((r) => r.id === record.id);
@@ -84,6 +104,9 @@ class MemoryStore implements Store {
   createUser(user: UserRecord): void {
     this.users.set(user.id, user);
   }
+  updateUser(user: UserRecord): void {
+    this.users.set(user.id, user);
+  }
   getUser(id: string): UserRecord | null {
     return this.users.get(id) ?? null;
   }
@@ -91,6 +114,12 @@ class MemoryStore implements Store {
     const wanted = email.toLowerCase();
     for (const u of this.users.values()) if (u.email === wanted) return u;
     return null;
+  }
+  saveEnquiry(enquiry: EnquiryRecord): void {
+    this.enquiries.unshift(enquiry);
+  }
+  listEnquiries(): EnquiryRecord[] {
+    return [...this.enquiries];
   }
 }
 
@@ -120,6 +149,17 @@ interface UserRow {
   name: string;
   password_hash: string;
   plan: string;
+  phone: string | null;
+  created_at: string;
+}
+
+interface EnquiryRow {
+  id: string;
+  name: string;
+  email: string;
+  company: string;
+  seats: string;
+  message: string;
   created_at: string;
 }
 
@@ -152,6 +192,7 @@ function toUser(row: UserRow): UserRecord {
     name: row.name,
     passwordHash: row.password_hash,
     plan: row.plan,
+    phone: row.phone ?? null,
     createdAt: row.created_at,
   };
 }
@@ -197,6 +238,16 @@ class SqliteStore implements Store {
         name TEXT NOT NULL,
         password_hash TEXT NOT NULL,
         plan TEXT NOT NULL DEFAULT 'solo',
+        phone TEXT,
+        created_at TEXT NOT NULL
+      );
+      CREATE TABLE IF NOT EXISTS enquiries (
+        id TEXT PRIMARY KEY,
+        name TEXT NOT NULL,
+        email TEXT NOT NULL,
+        company TEXT NOT NULL,
+        seats TEXT NOT NULL,
+        message TEXT NOT NULL,
         created_at TEXT NOT NULL
       );
     `);
@@ -207,6 +258,11 @@ class SqliteStore implements Store {
       } catch {
         // Already there.
       }
+    }
+    try {
+      this.db.exec("ALTER TABLE users ADD COLUMN phone TEXT");
+    } catch {
+      // Already there.
     }
   }
 
@@ -256,8 +312,33 @@ class SqliteStore implements Store {
 
   createUser(user: UserRecord): void {
     this.db
-      .prepare("INSERT INTO users (id, email, name, password_hash, plan, created_at) VALUES (?, ?, ?, ?, ?, ?)")
-      .run(user.id, user.email, user.name, user.passwordHash, user.plan, user.createdAt);
+      .prepare("INSERT INTO users (id, email, name, password_hash, plan, phone, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)")
+      .run(user.id, user.email, user.name, user.passwordHash, user.plan, user.phone, user.createdAt);
+  }
+
+  updateUser(user: UserRecord): void {
+    this.db
+      .prepare("UPDATE users SET name = ?, plan = ?, phone = ? WHERE id = ?")
+      .run(user.name, user.plan, user.phone, user.id);
+  }
+
+  saveEnquiry(enquiry: EnquiryRecord): void {
+    this.db
+      .prepare("INSERT INTO enquiries (id, name, email, company, seats, message, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)")
+      .run(enquiry.id, enquiry.name, enquiry.email, enquiry.company, enquiry.seats, enquiry.message, enquiry.createdAt);
+  }
+
+  listEnquiries(): EnquiryRecord[] {
+    const rows = this.db.prepare("SELECT * FROM enquiries ORDER BY created_at DESC").all() as EnquiryRow[];
+    return rows.map((r) => ({
+      id: r.id,
+      name: r.name,
+      email: r.email,
+      company: r.company,
+      seats: r.seats,
+      message: r.message,
+      createdAt: r.created_at,
+    }));
   }
 
   getUser(id: string): UserRecord | null {

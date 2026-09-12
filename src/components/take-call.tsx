@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
@@ -9,9 +10,15 @@ interface Props {
   destinationMasked: string;
   tone?: string;
   intent?: string;
+  /**
+   * What is standing between this person and a live call, when it is something they can fix
+   * themselves. Anything they cannot fix, like the key or the live flag, is not their problem
+   * to solve here and the recorded call runs instead.
+   */
+  needsNumber?: "signin" | "phone" | null;
 }
 
-export function TakeCall({ personaId, live, destinationMasked, tone, intent }: Props) {
+export function TakeCall({ personaId, live, destinationMasked, tone, intent, needsNumber }: Props) {
   const router = useRouter();
   const [armed, setArmed] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -79,6 +86,27 @@ export function TakeCall({ personaId, live, destinationMasked, tone, intent }: P
       >
         {live ? "Call me now" : "Play a call that already happened"}
       </button>
+      {!live && needsNumber ? (
+        <p className="mt-3 max-w-xs text-[13px] leading-relaxed text-text-2">
+          {needsNumber === "signin" ? (
+            <>
+              To be rung for real,{" "}
+              <Link href="/signin" className="text-text underline decoration-dotted underline-offset-4">
+                sign in
+              </Link>{" "}
+              and add your phone.
+            </>
+          ) : (
+            <>
+              To be rung for real, add your phone under{" "}
+              <Link href="/settings" className="text-text underline decoration-dotted underline-offset-4">
+                Settings
+              </Link>
+              .
+            </>
+          )}
+        </p>
+      ) : null}
       {error ? <p className="mt-3 text-[13px] text-text-2">{error}</p> : null}
     </div>
   );

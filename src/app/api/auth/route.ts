@@ -9,6 +9,7 @@ import {
   verifyPassword,
 } from "@/lib/auth";
 import { getStore } from "@/lib/db";
+import { isE164 } from "@/lib/mask";
 
 export const runtime = "nodejs";
 
@@ -23,6 +24,7 @@ export async function POST(request: Request) {
       password?: string;
       name?: string;
       plan?: string;
+      phone?: string;
     };
     const store = await getStore();
 
@@ -46,12 +48,21 @@ export async function POST(request: Request) {
       if (store.getUserByEmail(email)) {
         return NextResponse.json({ error: "There is already an account with that email. Sign in instead." }, { status: 409 });
       }
+      // Optional at signup, required before a phone can ring. Better to let someone in first.
+      const phone = (body.phone ?? "").trim();
+      if (phone && !isE164(phone)) {
+        return NextResponse.json(
+          { error: "That phone number needs a leading plus and a country code, like +14155550123." },
+          { status: 400 },
+        );
+      }
       const user = {
         id: randomUUID(),
         email,
         name: (body.name ?? "").trim() || email.split("@")[0]!,
         passwordHash: hashPassword(password),
         plan: PLANS.has(body.plan ?? "") ? body.plan! : "solo",
+        phone: phone || null,
         createdAt: new Date().toISOString(),
       };
       store.createUser(user);

@@ -38,6 +38,7 @@ export async function POST(request: Request) {
     const outcome = await runDrill(persona, {
       fixtureId: body.fixtureId,
       settings,
+      accountPhone: user?.phone ?? null,
       idempotencyKey: `sparbird:${personaId}:${tone}:${intent}:${new Date().toISOString().slice(0, 16)}`,
     });
 

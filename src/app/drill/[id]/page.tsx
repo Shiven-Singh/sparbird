@@ -2,7 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Avatar } from "@/components/avatar";
 import { TakeCall } from "@/components/take-call";
-import { isLive, previewDrill } from "@/lib/calle";
+import { liveReadiness, previewDrill } from "@/lib/calle";
 import { currentUser } from "@/lib/auth";
 import { INTENTS, TONES, canSee, isIntentKey, isToneKey, listPersonaIds, loadPersona } from "@/lib/persona";
 import type { CallSettings } from "@/lib/types";
@@ -36,8 +36,9 @@ export default async function DrillPage({
   const persona = loadPersona(id);
   const user = await currentUser();
   if (!canSee(persona, user?.id ?? null)) notFound();
-  const preview = previewDrill(persona, undefined, settings);
-  const live = isLive();
+  const ready = liveReadiness(user?.phone);
+  const preview = previewDrill(persona, user?.phone ?? undefined, settings);
+  const live = ready.ready;
   const provenance = persona.provenance ?? [];
 
   const href = (next: Partial<CallSettings>) => {
@@ -76,10 +77,17 @@ export default async function DrillPage({
           </div>
         </div>
         <div className="flex w-full flex-col items-start gap-2 lg:w-auto">
-          <TakeCall personaId={persona.id} live={live} destinationMasked={preview.destinationMasked} tone={tone} intent={intent} />
+          <TakeCall
+            personaId={persona.id}
+            live={live}
+            destinationMasked={ready.numberMasked ?? "your phone"}
+            tone={tone}
+            intent={intent}
+            needsNumber={!user ? "signin" : ready.missing.includes("phone-missing") ? "phone" : null}
+          />
           <p className="max-w-xs text-[12px] leading-relaxed text-muted">
             {live
-              ? `Rings ${preview.destinationMasked}, your own number and nobody else's.`
+              ? `Rings ${ready.numberMasked}, your own number and nobody else's.`
               : "Nothing will ring. This plays a call that already happened, and scores it the way it would score yours."}
           </p>
         </div>

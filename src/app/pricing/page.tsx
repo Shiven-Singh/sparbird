@@ -19,7 +19,7 @@ const FAQ: Array<[string, string]> = [
   ],
   [
     "Who does it call?",
-    "You. Only ever the number on your own account, and every call opens by saying out loud that it is a rehearsal. There is no contact list and no way to point it at somebody else.",
+    "You. It rings the number saved on your own account and no other, and every call opens by saying out loud that it is a rehearsal. There is no list to upload and no way to dial somebody else.",
   ],
   [
     "Can I cancel?",
@@ -70,7 +70,7 @@ export default async function PricingPage() {
             </ul>
 
             <Link
-              href={plan.id === "custom" ? "mailto:hello@sparbird.com?subject=Sparbird%20for%20our%20team" : `/signup?plan=${plan.id}`}
+              href={plan.id === "custom" ? "/contact" : `/signup?plan=${plan.id}`}
               className={`btn mt-6 w-full ${plan.featured ? "btn-solid" : "btn-ghost"}`}
             >
               {plan.cta}

@@ -14,6 +14,7 @@ export function AuthForm({ mode, plan }: Props) {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [phone, setPhone] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -25,11 +26,11 @@ export function AuthForm({ mode, plan }: Props) {
       const response = await fetch("/api/auth", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ action: mode, name, email, password, plan }),
+        body: JSON.stringify({ action: mode, name, email, password, phone, plan }),
       });
       const data = await response.json();
       if (!response.ok) throw new Error(data.error ?? "That did not work.");
-      router.push("/");
+      router.push(mode === "signup" && !phone.trim() ? "/settings" : "/");
       router.refresh();
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : String(caught));
@@ -63,6 +64,28 @@ export function AuthForm({ mode, plan }: Props) {
           required
         />
       </div>
+
+      {mode === "signup" ? (
+        <div>
+          <label htmlFor="phone" className="label mb-1.5 block text-muted">
+            Your phone{" "}
+            <span className="font-normal normal-case tracking-normal">(this is the number we ring)</span>
+          </label>
+          <input
+            id="phone"
+            type="tel"
+            inputMode="tel"
+            className="field tnum"
+            value={phone}
+            onChange={(e) => setPhone(e.target.value)}
+            placeholder="+14155550123"
+            autoComplete="tel"
+          />
+          <p className="mt-1.5 text-[12px] leading-relaxed text-faint">
+            A plus, your country code, then the number. You can add it later instead.
+          </p>
+        </div>
+      ) : null}
 
       <div>
         <label htmlFor="password" className="label mb-1.5 block text-muted">
