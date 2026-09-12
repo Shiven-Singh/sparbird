@@ -67,6 +67,9 @@ function codeOf(cause: unknown): string | undefined {
 
 /** Plain-words advice for the failures a person can actually do something about. */
 const REMEDY: Record<string, string> = {
+  account_concurrency_exceeded:
+    "A CALL-E shared line runs one call at a time, and one is already running. Finish or cancel it " +
+    "in the CALL-E dashboard, or wait for it to time out. A dedicated number raises the limit.",
   unsupported_region:
     "CALL-E will not dial that country. Check the number's country code against the regions your CALL-E account can reach.",
   insufficient_balance: "The CALL-E account is out of credit. Top it up and try again.",
@@ -77,6 +80,26 @@ const REMEDY: Record<string, string> = {
   invalid_recipient: "CALL-E rejected the recipient. Check the number is one this account may call.",
   recipient_blocked: "That number is blocked at CALL-E's end.",
 };
+
+/**
+ * Failures that will pass on their own. Worth separating: being told to wait a minute is a very
+ * different instruction from being told your key is wrong, and they used to read the same.
+ */
+const TRANSIENT = new Set(["account_concurrency_exceeded", "rate_limit_exceeded", "provider_unavailable", "call_not_ready"]);
+
+/** What the person who pressed the button should read. Exported so it can be tested offline. */
+export function placementMessage(error: unknown): string {
+  const code = codeOf(error);
+  return [
+    `CALL-E would not place the call: ${explain(error)}.`,
+    code ? REMEDY[code] : undefined,
+    code && TRANSIENT.has(code)
+      ? "Nothing was dialled and nothing was charged. This one clears by itself, so try again shortly."
+      : "Nothing has been scored. If the phone rang, the call still happened and may still be charged.",
+  ]
+    .filter(Boolean)
+    .join(" ");
+}
 
 export function isLive(): boolean {
   return process.env.SPARBIRD_LIVE === "1";
@@ -336,18 +359,9 @@ export async function runDrill(spec: PersonaSpec, options: RunDrillOptions = {})
     const outcome = normalise(call as unknown as Record<string, unknown>, spec.id, true);
     return settings ? { ...outcome, settings } : outcome;
   } catch (error) {
-    const code = codeOf(error);
-    const remedy = code ? REMEDY[code] : undefined;
     // The reason belongs where the person pressing the button can read it. Swallowing it
     // behind "something went wrong" is how you end up staring at a phone that never rings.
-    const message = [
-      `CALL-E would not place the call: ${explain(error)}.`,
-      remedy,
-      "Nothing has been scored. If the phone rang, the call still happened and may still be charged.",
-    ]
-      .filter(Boolean)
-      .join(" ");
-    console.error("[sparbird] live call failed", { code, detail: explain(error) });
-    throw new CallePlacementError(message, error);
+    console.error("[sparbird] live call failed", { code: codeOf(error), detail: explain(error) });
+    throw new CallePlacementError(placementMessage(error), error);
   }
 }
